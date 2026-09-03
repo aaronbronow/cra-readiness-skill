@@ -1,0 +1,134 @@
+# CRA Readiness Score
+
+An agent skill that grades a GitHub repository's readiness for the EU Cyber Resilience Act
+(Regulation (EU) 2024/2847) on an A–D scale, written for startup founders who are not
+security specialists.
+
+Ask your coding agent:
+
+> "Give me a score for how ready my GitHub repo is to comply with the Cyber Resilience Act."
+
+You get a letter grade, a plain-English explanation, the three things to do next, and a
+40-row checklist with the evidence behind every row.
+
+| Grade | Meaning |
+|-------|---------|
+| **A** | Ready for EU launch, as far as this assessment can see |
+| **B** | Needs automation work (SBOM, scanning, signing, monitoring) |
+| **C** | Needs automation work and policy/document work |
+| **D** | Needs both, and the assessment could not see enough (permissions or missing answers) to be sure of anything more |
+
+The checklist is the 40-item manufacturer compliance matrix published at
+[cyberresilienceact.eu](https://www.cyberresilienceact.eu/compliance-matrix.html).
+
+## What it is not
+
+- Not legal advice, and not a compliance certification. A repository cannot be compliant;
+  a company is. The report always says which items a repo cannot show.
+- Not a classifier. It flags features that may make a product "Important" or "Critical"
+  under CRA Annex III/IV, but the decision is yours (or your advisor's).
+- Not a scanner. Repository evidence is read, not executed.
+
+## Install
+
+The skill is a directory in the [Agent Skills](https://agentskills.io) format: a `SKILL.md`
+with supporting files. It works in any agent that reads that format.
+
+| Agent | Where to put the directory |
+|-------|----------------------------|
+| Claude Code | `~/.claude/skills/cra-readiness-score/` (global) or `.claude/skills/cra-readiness-score/` (project) |
+| OpenCode | `~/.config/opencode/skills/cra-readiness-score/` (global) or `.opencode/skills/cra-readiness-score/` (project) |
+| Codex CLI | `~/.codex/skills/cra-readiness-score/` |
+| Cursor | `.cursor/skills/cra-readiness-score/` |
+| Other | Wherever the agent discovers `SKILL.md` files |
+
+```sh
+git clone <this repo> cra-readiness-score
+cp -r cra-readiness-score ~/.claude/skills/        # or the path for your agent
+```
+
+## How an assessment runs
+
+1. **Intake** – the agent asks where the code is and how you want evidence gathered, then a
+   short set of scope and document questions. "Don't know" and "skip" are valid answers.
+2. **Evidence** – one of:
+   - the optional collector script (below), which reads the repo and a few GitHub settings;
+   - the agent inspecting files directly with its own tools;
+   - you pasting a few files when you have no tool access to grant.
+3. **Statuses** – each of the 40 items becomes Met / Partial / Not met / Could not check / N/A
+   according to fixed rules in `references/checklist.md`.
+4. **Grade** – computed mechanically from `references/scoring.md`.
+5. **Report** – fixed layout from `references/report-template.md`.
+
+## The collector script (optional)
+
+`scripts/collect.py` gathers repository evidence into JSON so the grade rests on facts rather
+than the agent's impression. You do not have to use it; without it the agent inspects files
+itself and more items end up as "could not check".
+
+- Python 3.8+, standard library only. Nothing to install.
+- Contacts only `api.github.com` and `github.com` (for a shallow clone). Uploads nothing.
+- Uses a GitHub token if one is available (`--token`, `GITHUB_TOKEN`, `GH_TOKEN`, or the
+  `gh` CLI). Without one it still works on public repositories; admin-only settings
+  (branch protection, Dependabot alerts) are reported as not readable rather than guessed.
+
+```sh
+python3 scripts/collect.py --repo OWNER/NAME --summary
+python3 scripts/collect.py --path /path/to/checkout --summary     # no network at all
+python3 scripts/collect.py --repo OWNER/NAME --out evidence.json
+```
+
+Output sections:
+
+- `access` – what worked: token source, clone status, and every API call with its result
+  (`ok`, `permission_denied`, `not_found`, `rate_limited`, ...).
+- `signals` – raw findings: key files, workflows and the tools they use, release assets,
+  document categories detected, SECURITY.md analysis, default-credential hits, etc.
+- `checks` – preliminary status for each of the 40 items with the evidence to cite and a
+  hint where intake answers are needed. Items that only a founder can answer are `UNKNOWN`
+  with `intake_only`.
+
+## Repository layout
+
+```
+SKILL.md                      entry point for the agent
+references/
+  cra-background.md           dates, scope, roles, one-paragraph summaries of the annexes
+  checklist.md                the 40 items: track, gate, evidence, status rules, fixes
+  scoring.md                  A/B/C/D rules, confidence label, worked examples
+  intake.md                   founder questionnaire and answer-to-status mapping
+  report-template.md          fixed report layout and writing rules
+  glossary.md                 one-line definitions used in reports
+scripts/
+  collect.py                  optional evidence collector
+examples/
+  sample-report.md            what a finished report looks like
+```
+
+## Design notes
+
+- **Two tracks.** Every item is either *Automation & tooling* (8 items: fixed with CI jobs and
+  repo settings) or *Policy, design & documents* (32 items: decisions, documents, product
+  changes, legal steps). The split drives the B/C distinction.
+- **Gate items.** 20 items must be Met for an A. They are the ones a customer or authority
+  asks for first.
+- **Unknown is honest.** Missing permissions or skipped questions produce "could not check",
+  never "not met". Ten or more unknowns produce a D with a list of exactly what would fix it.
+- **Attestations are labelled.** A founder's "yes, we have that" counts, but the report marks
+  it "based on your answer, not verified".
+
+## Status
+
+Version 2026.09. Built for manufacturer-level obligations only (not open-source stewards,
+importers or distributors). Cross-agent testing and rubric calibration against real repos are
+the next steps and have not been done yet.
+
+## License
+
+MIT. See `LICENSE`.
+
+## Sources
+
+- Regulation (EU) 2024/2847: https://eur-lex.europa.eu/eli/reg/2024/2847/oj
+- 40-item compliance matrix: https://www.cyberresilienceact.eu/compliance-matrix.html
+- OpenSSF OSPS Baseline (related control mapping): https://baseline.openssf.org/
