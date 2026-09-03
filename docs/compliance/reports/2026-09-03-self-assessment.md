@@ -1,5 +1,10 @@
 # CRA Readiness: aaronbronow/cra-readiness-skill
 
+> **Historical.** Produced under rubric 2026.09.0, before the baseline/beyond-the-letter split
+> in 2026.09.1. Under the current rubric F4 is N/A (Art. 18 makes a representative optional),
+> B6 is a policy item, and D3 is Met at baseline (regular automated testing; the pentest is a
+> recommended practice). Re-run for a current grade.
+
 **Grade: D – Needs automation and policy/document work, and this assessment could not see enough (missing permissions or information) to be sure of anything more**
 Confidence: Low · Assessed 2026-09-03 · Checklist version 2026.09
 

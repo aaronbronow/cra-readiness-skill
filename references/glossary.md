@@ -69,7 +69,10 @@ Use these definitions the first time a term appears in a report. Keep the wordin
 - **Secure by default** – The product is safe as shipped, without the customer having to change
   settings.
 - **Data minimisation** – Collecting and storing only the data the product needs.
-- **Authorised representative** – An EU-based person or company a non-EU manufacturer appoints,
-  by written mandate, to deal with EU authorities.
+- **Authorised representative** – An EU-based person or company a manufacturer *may* appoint,
+  by written mandate, to deal with EU authorities (CRA Art. 18). Optional under the CRA.
+- **Baseline vs. beyond the letter** – In this skill, "baseline" is what the CRA text requires
+  and is what the grade measures; "beyond the letter" is recommended practice from sources such
+  as OpenSSF Scorecard, the OSPS Baseline, NIST SSDF or ETSI EN 303 645, reported but not graded.
 - **Market surveillance authority** – The national body that checks products on the market comply
   and can order withdrawals or recalls.

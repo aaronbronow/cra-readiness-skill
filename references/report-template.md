@@ -10,7 +10,8 @@ Every repo-based finding must name the file, workflow, release or setting it cam
 # CRA Readiness: <owner/repo>
 
 **Grade: <A|B|C|D> – <fixed headline wording from scoring.md>**
-Confidence: <High|Medium|Low> · Assessed <YYYY-MM-DD> · Checklist version <from cra-background.md>
+Confidence: <High|Medium|Low> · Assessed <YYYY-MM-DD> · Rubric <version from cra-background.md>
+Graded against the letter of Regulation (EU) 2024/2847 only; recommended practices are reported separately below.
 
 <Two or three sentences in plain English: what the grade means for this founder, the single
 biggest reason for the grade, and how far they are from the next grade up.>
@@ -36,6 +37,17 @@ Automation & tooling: <n met / 8> · Policy, design & documents: <n met / 32>
 
 2. ...
 
+3. ...
+
+## Beyond the letter of the law
+
+The grade above measures only what the CRA literally requires. The practices below are not
+legal obligations; they are what security-conscious customers and auditors expect, and they make
+the legal requirements easier to prove. Adopted: <X> of <Y> assessable.
+
+Worth adopting next:
+1. **<practice>** [<source tag>] – <one sentence on why, tied to a baseline item it strengthens>.
+2. ...
 3. ...
 
 ## Deadlines that matter
@@ -103,8 +115,12 @@ confirm compliance. Checklist version <x>, rules last reviewed <date>.*
 ## Writing rules
 
 - Lead with the grade and the reason. Founders read the first five lines.
-- "Do these next" is always exactly three items. Prefer gate items, then items that flip the
-  grade, then cheapest wins. If the grade is D, the three items are the access/answers needed.
+- "Do these next" is always exactly three items, all from the **baseline** layer. Prefer gate
+  items, then items that flip the grade, then cheapest wins. If the grade is D, the three items
+  are the access/answers needed.
+- "Beyond the letter" lists at most three practices, each with its source tag in square brackets
+  and never phrased as a requirement ("recommended", "customers will expect"). If the founder
+  asks whether a practice is required, the answer is no, and say which baseline item it supports.
 - Use "you/your" for the founder, "the product" for the software, "the repo" for the repository.
 - Do not praise. State what is present, what is missing, what to do.
 - Do not invent evidence. If the collector output or your inspection did not show it, it is

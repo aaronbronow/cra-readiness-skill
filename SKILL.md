@@ -26,8 +26,12 @@ Read reference files only when the step needs them. Do not paste their contents 
 
 ## Principles
 
-1. **The grade is mechanical.** Statuses come from `checklist.md` rules; the letter comes from
-   `scoring.md` rules. Never adjust a grade by feel.
+1. **The grade is mechanical and measures the letter of the law only.** Every item in
+   `checklist.md` has two layers: a *CRA baseline* (what Regulation (EU) 2024/2847 literally
+   requires, with article references) and *Beyond the letter* (industry practices such as branch
+   protection, SBOM-in-CI or a pentest, each tagged with its source). Statuses and the A/B/C/D
+   grade come **only** from the baseline. Practices are reported in their own section and never
+   move the grade. Never present a practice as a legal requirement. Never adjust a grade by feel.
 2. **Evidence or nothing.** Every "Met" from the repo names a file, workflow, release or setting.
    Every "Met" from the founder is labelled "based on your answer, not verified".
 3. **Unknown is honest.** If you cannot see something, it is "Could not check", not "Not met".
@@ -105,13 +109,17 @@ no more than two things per message. Everything you do not receive is `UNKNOWN`.
 
 ### Step 4 · Assign statuses
 
-Read `references/checklist.md`. For each of the 40 items, apply its status rules to the evidence
-and intake answers. Produce an internal table: `ID | status | source | evidence`.
+Read `references/checklist.md`. For each of the 40 items, apply its **Baseline** status rules to
+the evidence and intake answers. Produce an internal table: `ID | status | source | evidence`.
+Separately, record for each listed practice whether it is adopted, not adopted, or not assessable.
 
 - Repo evidence beats intake answers when they conflict; note the conflict.
-- Do not infer beyond the rules. "There is a test directory" does not make D1 MET; the rule
-  requires a written plan plus tests in CI.
-- `NA` needs a recorded reason (e.g. "library; no listening ports").
+- A documented manual process that satisfies the baseline is MET. Missing tooling is a practice
+  gap, not a baseline gap.
+- Do not infer beyond the rules.
+- `NA` needs a recorded reason (e.g. "library; no listening ports"). F4 is NA by default.
+- If the collector was used, its `checks[].status` is the baseline and `checks[].practices` is
+  the practice layer; both are starting points, refined by intake.
 
 ### Step 5 · Compute the grade
 
@@ -122,8 +130,10 @@ fired; you will cite it under Notes if the result could surprise the founder.
 ### Step 6 · Write the report
 
 Read `references/report-template.md` and follow it exactly: headline grade with fixed wording,
-plain-English summary, at-a-glance counts, exactly three next actions, deadlines, the full
-40-row table, what could not be checked, what a repo cannot show, notes, disclaimer.
+plain-English summary, at-a-glance counts, exactly three next actions (baseline only), a
+"Beyond the letter" section with the practice count and up to three suggestions with source
+tags, deadlines, the full 40-row table, what could not be checked, what a repo cannot show,
+notes, disclaimer.
 
 Use the glossary wording the first time a term appears. Cite file paths and setting names
 from the evidence. No percentages, no praise, no invented evidence.
@@ -135,14 +145,22 @@ After the report, offer at most three of:
   outline, risk assessment table) as a starting point in the repo.
 - Draft a CI workflow for SBOM generation and scanning, or for signing releases.
 - Re-run the assessment after changes, or with an admin token to clear "could not check" items.
-- Explain any item in more depth.
+- Explain any item in more depth, including exactly where a "beyond the letter" practice comes
+  from and which baseline item it supports.
 
-Only create or modify files if the founder asks.
+Only create or modify files if the founder asks. If asked to save the report, put it under
+`docs/compliance/reports/<YYYY-MM-DD>-cra-readiness.md`; the collector skips that directory by
+default so reports are never mistaken for the product's own policy documents.
 
 ## Guardrails
 
 - Do not tell a founder they are "compliant". The strongest claim is "ready for EU launch as far
   as this assessment can see".
+- Do not tell a founder that a practice (branch protection, required reviews, pentest, SBOM in
+  CI, Dependabot, 12-month EOL notice, EU representative) is required by the CRA. None of them
+  are. Say "recommended" and cite the source tag from `checklist.md`.
+- Where the source matrix at cyberresilienceact.eu states more than the regulation does,
+  `checklist.md` and `cra-background.md` say so; follow the regulation.
 - Do not decide product classification (Default/Important/Critical). Flag indicators, recommend
   they confirm with an advisor or the classification tool on the source site.
 - Do not run the collector or fetch anything until the founder has chosen an evidence option.
