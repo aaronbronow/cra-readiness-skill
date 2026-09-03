@@ -1,0 +1,74 @@
+name: CI
+
+# CRA checklist D2: every pull request runs checks that must pass before merge.
+# CRA checklist D3: secret scanning (gitleaks) on every change; SAST lives in codeql.yml.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: test
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.8", "3.12"] # oldest supported and pinned development version
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Byte-compile the collector
+        run: python -m py_compile scripts/collect.py
+
+      - name: Collector runs offline against this checkout
+        run: |
+          python scripts/collect.py --path . --no-api --out evidence.json
+          python - <<'PY'
+          import json
+          d = json.load(open("evidence.json"))
+          assert len(d["checks"]) == 40, "expected 40 checklist items"
+          assert d["access"]["local_files"] is True
+          ids = [c["id"] for c in d["checks"]]
+          assert ids[0] == "F1" and ids[-1] == "P10", ids
+          print("collector OK:", d["counts"])
+          PY
+
+      - name: Reference files are complete
+        run: |
+          set -e
+          for f in SKILL.md references/checklist.md references/scoring.md references/intake.md \
+                   references/report-template.md references/glossary.md references/cra-background.md; do
+            test -s "$f" || { echo "missing $f"; exit 1; }
+          done
+          # SKILL.md frontmatter must declare a name and description
+          head -5 SKILL.md | grep -q '^name: ' && head -5 SKILL.md | grep -q '^description: '
+          # all 40 item IDs must be present in the checklist
+          for id in F1 F2 F3 F4 B1 B2 B3 B4 B5 B6 B7 B8 B9 D1 D2 D3 D4 D5 \
+                    R1 R2 R3 R4 R5 R6 R7 R8 R9 R10 R11 R12 P1 P2 P3 P4 P5 P6 P7 P8 P9 P10; do
+            grep -q "^### $id " references/checklist.md || { echo "checklist missing $id"; exit 1; }
+          done
+          echo "references OK"
+
+  secrets:
+    name: secrets
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # gitleaks scans history
+
+      - name: gitleaks
+        uses: gitleaks/gitleaks-action@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

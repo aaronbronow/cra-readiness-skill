@@ -351,10 +351,17 @@ def collect_org_security_policy(gh, owner):
     return None
 
 
-def scan_files(root):
-    """Walk a local checkout and extract evidence signals."""
+def scan_files(root, excludes=None):
+    """Walk a local checkout and extract evidence signals.
+
+    excludes: iterable of repo-relative directory prefixes to skip (e.g. "examples", "docs/vendor").
+    Useful when a repo contains documents *about* compliance (templates, fixtures) that should not
+    count as the product's own policy documents.
+    """
+    excludes = [e.strip("/").replace(os.sep, "/") for e in (excludes or []) if e.strip("/")]
     sig = {
         "root": root,
+        "excluded": excludes,
         "files_scanned": 0,
         "key_files": {},
         "lockfiles": [],
@@ -387,8 +394,14 @@ def scan_files(root):
 
     doc_files = []
     for dirpath, dirnames, filenames in os.walk(root):
-        dirnames[:] = [d for d in dirnames if d in (".github", ".well-known") or (d not in SKIP_DIRS and not d.startswith("."))]
-        depth = rel(root, dirpath).count("/")
+        here = rel(root, dirpath)
+        here = "" if here == "." else here
+        dirnames[:] = [
+            d for d in dirnames
+            if (d in (".github", ".well-known") or (d not in SKIP_DIRS and not d.startswith(".")))
+            and (here + "/" + d if here else d) not in excludes
+        ]
+        depth = here.count("/") if here else 0
         if depth > 6:
             dirnames[:] = []
             continue
@@ -1165,6 +1178,8 @@ def main(argv=None):
     ap.add_argument("--no-api", action="store_true", help="Do not call the GitHub API")
     ap.add_argument("--no-clone", action="store_true", help="Do not clone; scan only --path")
     ap.add_argument("--keep-clone", action="store_true", help="Keep the temporary clone directory")
+    ap.add_argument("--exclude", action="append", default=[], metavar="DIR",
+                    help="Repo-relative directory to skip (repeatable), e.g. --exclude examples --exclude docs/templates")
     args = ap.parse_args(argv)
 
     if not args.repo and not args.path:
@@ -1210,7 +1225,7 @@ def main(argv=None):
     if scan_path and os.path.isdir(scan_path):
         scan_path = os.path.abspath(scan_path)
         result["access"]["local_files"] = True
-        files_sig = scan_files(scan_path)
+        files_sig = scan_files(scan_path, args.exclude)
         git_sig = scan_git(scan_path)
         result["signals"]["files"] = files_sig
         result["signals"]["git"] = git_sig

@@ -1,0 +1,76 @@
+name: Release
+
+# CRA checklist R1/R2: SBOM (SPDX JSON) generated and vulnerability-screened per release.
+# CRA checklist D4:    signed build provenance (Sigstore via GitHub artifact attestations) + checksums.
+# CRA checklist P7:    releases are automated from a tag, so a dependency fix can ship fast.
+#
+# Trigger: push a tag like v0.1.0.
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    name: release
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write       # create the release and upload assets
+      id-token: write       # Sigstore keyless signing for the attestation
+      attestations: write   # store the attestation on GitHub
+    env:
+      TAG: ${{ github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Package the skill
+        run: |
+          set -euo pipefail
+          name="cra-readiness-skill-${TAG}"
+          mkdir -p "dist/${name}"
+          cp -r SKILL.md README.md LICENSE SECURITY.md references scripts "dist/${name}/"
+          tar -C dist -czf "dist/${name}.tar.gz" "${name}"
+          rm -rf "dist/${name}"
+          ls -la dist
+
+      - name: Generate SBOM (SPDX JSON)
+        uses: anchore/sbom-action@v0
+        with:
+          path: .
+          format: spdx-json
+          output-file: dist/cra-readiness-skill-${{ github.ref_name }}.spdx.json
+          upload-artifact: false
+          upload-release-assets: false
+
+      - name: Scan SBOM for known vulnerabilities (gate)
+        id: scan
+        uses: anchore/scan-action@v7
+        with:
+          sbom: dist/cra-readiness-skill-${{ github.ref_name }}.spdx.json
+          fail-build: true
+          severity-cutoff: medium
+          output-format: table
+
+      - name: Checksums
+        working-directory: dist
+        run: sha256sum *.tar.gz *.spdx.json > SHA256SUMS.txt && cat SHA256SUMS.txt
+
+      - name: Attest build provenance (Sigstore)
+        uses: actions/attest-build-provenance@v4
+        with:
+          subject-path: |
+            dist/*.tar.gz
+            dist/*.spdx.json
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release create "$TAG" dist/* \
+            --title "$TAG" \
+            --generate-notes \
+            --notes "Assets: skill tarball, SPDX SBOM, SHA256SUMS. Verify provenance with: gh attestation verify <file> --repo ${GITHUB_REPOSITORY}"

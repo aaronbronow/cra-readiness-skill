@@ -67,7 +67,11 @@ python3 scripts/collect.py --repo OWNER/NAME            # GitHub API + shallow c
 python3 scripts/collect.py --path /path/to/checkout     # local files only, no network
 python3 scripts/collect.py --repo OWNER/NAME --path .   # both
 python3 scripts/collect.py --path . --summary           # add a human-readable summary
+python3 scripts/collect.py --path . --exclude docs/templates   # skip dirs holding sample/vendored docs
 ```
+
+Use `--exclude` when a directory contains documents *about* compliance that are not the
+product's own (templates, examples, fixtures, vendored docs); otherwise they inflate policy items.
 
 - It reads `GITHUB_TOKEN` or `GH_TOKEN` from the environment, or asks the `gh` CLI for a token
   if installed. Without a token it still works for public repositories, but repository

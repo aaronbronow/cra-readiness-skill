@@ -1,0 +1,57 @@
+name: Vulnerability scan
+
+# CRA checklist P2: components are compared against live vulnerability feeds on a schedule
+# (not only when code changes), fast enough to support the Art. 14 24-hour reporting window.
+# CRA checklist B5/R1: pull requests that add vulnerable or badly licensed dependencies are blocked.
+
+on:
+  schedule:
+    - cron: "5 */12 * * *" # twice daily
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  dependency-review:
+    name: dependency-review
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/dependency-review-action@v5.0.0
+        with:
+          fail-on-severity: moderate
+          deny-licenses: GPL-3.0, AGPL-3.0
+
+  scheduled-scan:
+    name: scheduled-scan
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate SBOM (SPDX JSON)
+        uses: anchore/sbom-action@v0
+        with:
+          path: .
+          format: spdx-json
+          output-file: sbom.spdx.json
+          upload-artifact: false
+
+      - name: Scan SBOM with Grype against current feeds
+        uses: anchore/scan-action@v7
+        with:
+          sbom: sbom.spdx.json
+          fail-build: true
+          severity-cutoff: medium
+          output-format: table
+
+      - name: Scan lockfiles with OSV-Scanner
+        uses: google/osv-scanner-action/osv-scanner-action@v2.5.1
+        with:
+          scan-args: |
+            --lockfile=uv.lock
+            --recursive
+            .

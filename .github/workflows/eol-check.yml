@@ -1,0 +1,49 @@
+name: EOL check
+
+# CRA checklist B6: know when runtimes stop receiving security fixes.
+# Queries endoflife.date for the pinned Python version and fails if it is EOL
+# or within 12 months of EOL, so the pin gets updated before it becomes a problem.
+
+on:
+  schedule:
+    - cron: "17 6 * * 1" # weekly, Monday 06:17 UTC
+  pull_request:
+    paths:
+      - ".python-version"
+      - "pyproject.toml"
+      - ".github/workflows/eol-check.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  python-eol:
+    name: python-eol
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check pinned Python against endoflife.date
+        shell: bash
+        run: |
+          set -euo pipefail
+          pin="$(tr -d '[:space:]' < .python-version)"
+          cycle="${pin%.*}"
+          if [[ "$pin" == "$cycle" ]]; then cycle="$pin"; fi
+          json="$(curl -fsSL "https://endoflife.date/api/python/${cycle}.json")"
+          eol="$(printf '%s' "$json" | python3 -c 'import json,sys; print(json.load(sys.stdin)["eol"])')"
+          echo "Python ${cycle}: security support ends ${eol}"
+          python3 - "$eol" <<'PY'
+          import datetime, sys
+          eol = datetime.date.fromisoformat(sys.argv[1])
+          today = datetime.date.today()
+          months_left = (eol.year - today.year) * 12 + (eol.month - today.month)
+          if eol <= today:
+              print(f"::error::Pinned Python is end-of-life since {eol}. Update .python-version.")
+              sys.exit(1)
+          if months_left < 12:
+              print(f"::error::Pinned Python reaches end-of-life on {eol} (<12 months). Plan the upgrade now.")
+              sys.exit(1)
+          print(f"OK: {months_left} months of security support remaining.")
+          PY

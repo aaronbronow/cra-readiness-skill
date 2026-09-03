@@ -1,0 +1,18 @@
+[project]
+name = "cra-readiness-skill"
+version = "0.1.0"
+description = "Agent skill and evidence collector that grade a GitHub repository's readiness for the EU Cyber Resilience Act"
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [{ name = "Aaron Bronow" }]
+requires-python = ">=3.8"
+# The collector is intentionally standard-library only. Keep this list empty.
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/aaronbronow/cra-readiness-skill"
+Security = "https://github.com/aaronbronow/cra-readiness-skill/blob/main/SECURITY.md"
+
+[tool.uv]
+# No build backend: this is not a distributable Python package, just a script plus markdown.
+package = false
