@@ -18,8 +18,12 @@ You get a letter grade, a plain-English explanation, the three things to do next
 | **C** | Needs automation work and policy/document work |
 | **D** | Needs both, and the assessment could not see enough (permissions or missing answers) to be sure of anything more |
 
-The checklist is the 40-item manufacturer compliance matrix published at
-[cyberresilienceact.eu](https://www.cyberresilienceact.eu/compliance-matrix.html).
+The checklist follows the 40-item manufacturer compliance matrix published at
+[cyberresilienceact.eu](https://www.cyberresilienceact.eu/compliance-matrix.html). Each item is
+graded against **the text of Regulation (EU) 2024/2847** (its "baseline"); industry practices
+that go further (branch protection, SBOM in CI, pentests, Dependabot, ...) are reported in a
+separate "Beyond the letter" section with their source and never affect the grade. Where the
+matrix states more than the regulation does, `references/cra-background.md` lists the difference.
 
 ## What it is not
 
@@ -125,9 +129,12 @@ Output sections:
   (`ok`, `permission_denied`, `not_found`, `rate_limited`, ...).
 - `signals` – raw findings: key files, workflows and the tools they use, release assets,
   document categories detected, SECURITY.md analysis, default-credential hits, etc.
-- `checks` – preliminary status for each of the 40 items with the evidence to cite and a
-  hint where intake answers are needed. Items that only a founder can answer are `UNKNOWN`
-  with `intake_only`.
+- `checks` – preliminary baseline status for each of the 40 items with the evidence to cite and
+  a hint where intake answers are needed, plus a `practices` list (name, source, adopted).
+  Items that only a founder can answer are `UNKNOWN` with `intake_only`.
+- `--exclude DIR|FILE` skips directories or files that hold documents *about* compliance
+  (templates, examples, fixtures). `docs/compliance/reports/` is always skipped; save assessment
+  reports there.
 
 ## Repository layout
 
@@ -150,11 +157,13 @@ examples/
 
 ## Design notes
 
-- **Two tracks.** Every item is either *Automation & tooling* (8 items: fixed with CI jobs and
-  repo settings) or *Policy, design & documents* (32 items: decisions, documents, product
-  changes, legal steps). The split drives the B/C distinction.
-- **Gate items.** 20 items must be Met for an A. They are the ones a customer or authority
-  asks for first.
+- **Two layers.** Every item has a *CRA baseline* (scored; the letter of the law with article
+  references) and *Beyond the letter* (reported; practices tagged `[Scorecard]`, `[OSPS]`,
+  `[SSDF]`, `[SLSA]`, `[ETSI]`, `[GitHub]`, `[Matrix]`). A documented manual process that
+  satisfies the law is Met; missing tooling is a practice gap, not a legal one.
+- **Two tracks.** Every item's baseline fix is either *Automation & tooling* (7 items) or
+  *Policy, design & documents* (33 items). The split drives the B/C distinction.
+- **Gate items.** 19 items must be Met for an A. Only literal obligations are gates.
 - **Unknown is honest.** Missing permissions or skipped questions produce "could not check",
   never "not met". Ten or more unknowns produce a D with a list of exactly what would fix it.
 - **Attestations are labelled.** A founder's "yes, we have that" counts, but the report marks
@@ -162,7 +171,7 @@ examples/
 
 ## Status
 
-Version 2026.09. Built for manufacturer-level obligations only (not open-source stewards,
+Rubric 2026.09.1. Built for manufacturer-level obligations only (not open-source stewards,
 importers or distributors). Cross-agent testing and rubric calibration against real repos are
 the next steps and have not been done yet.
 

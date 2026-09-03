@@ -1,7 +1,8 @@
 # CRA Readiness: acme-iot/thermostat-firmware
 
 **Grade: C – Needs automation work and policy/document work**
-Confidence: Medium · Assessed 2026-09-03 · Checklist version 2026.09
+Confidence: Medium · Assessed 2026-09-03 · Rubric 2026.09.1
+Graded against the letter of Regulation (EU) 2024/2847 only; recommended practices are reported separately below.
 
 Your repository already has most of the day-to-day security hygiene a customer would expect:
 dependency alerts, code scanning, a `SECURITY.md` with a contact, and tests on every pull
@@ -14,12 +15,12 @@ remaining policy items are then mostly writing.
 
 | | Count |
 |---|---|
-| Items met | 17 of 40 (2 not applicable) |
+| Items met | 17 of 40 (3 not applicable) |
 | Partially met | 8 |
 | Not met | 9 |
 | Could not check | 4 |
 
-Automation & tooling: 4 met / 8 · Policy, design & documents: 13 met / 32
+Automation & tooling: 4 met / 7 · Policy, design & documents: 13 met / 33
 
 ## Do these next
 
@@ -44,6 +45,22 @@ Automation & tooling: 4 met / 8 · Policy, design & documents: 13 met / 32
    Check the date against your MCU vendor's SDK end-of-life (B6). *Effort:* 1 hour.
    *Track:* Policy/documents.
 
+## Beyond the letter of the law
+
+The grade above measures only what the CRA literally requires. The practices below are not
+legal obligations; they are what security-conscious customers and auditors expect, and they make
+the legal requirements easier to prove. Adopted: 14 of 31 assessable.
+
+Worth adopting next:
+1. **Build provenance attestation for firmware images** [SLSA L2+; Scorecard Signed-Releases] –
+   turns your D4 checksums into verifiable authenticity with one workflow step, and answers the
+   "how do we know this image is yours" question customers ask.
+2. **Independent penetration test before EU launch** [Matrix; Practice] – not required by Annex I
+   Pt II(3), which asks for regular testing you already do via CodeQL, but a pentest report is
+   the strongest single item you can put in the technical file (Annex VII(6)).
+3. **Written risk-assessment triggers and a 12-month end-of-support announcement** [Matrix] –
+   neither is in the regulation, but both make P1 and P9 easy to evidence and cost 15 minutes.
+
 ## Deadlines that matter
 
 - 11 September 2026: vulnerability and incident reporting duties (Art. 14) apply. Your
@@ -62,7 +79,7 @@ Automation & tooling: 4 met / 8 · Policy, design & documents: 13 met / 32
 | F1 | Documented SDL | Partial | `CONTRIBUTING.md` has a "Security review" paragraph; no phases or roles |
 | F2 | Evidence of conformity with SDL | Partial | Required reviews (1) on `main`; no PR security checklist |
 | F3 | SDL covers secure-by-design/default | Not met | No SDL section on defaults or attack surface |
-| F4 | EU Authorised Representative | N/A | Company established in the EU (your answer) |
+| F4 | EU authorised representative (optional) | N/A | Optional under Art. 18; company is EU-established in any case (your answer) |
 
 ### Stage 2 · Before development
 | ID | Item | Status | Evidence / reason |
@@ -72,7 +89,7 @@ Automation & tooling: 4 met / 8 · Policy, design & documents: 13 met / 32
 | B3 | Risk assessment | Not met | No file found; your answer: none |
 | B4 | Threat modelling | Partial | Your answer: done informally, not documented |
 | B5 | Third-party component policy | Partial | `actions/dependency-review-action` in `ci.yml`; no written policy |
-| B6 | EOL check for tools/dependencies | Partial | `platformio.ini` pins libraries; base image `espressif/idf:latest` in `Dockerfile`; no EOL tooling |
+| B6 | Component/runtime EOL considered | Partial | Libraries pinned in `platformio.ini`; no record of component EOL in the support-period reasoning (Art. 13(8), Annex VII(4)) |
 | B7 | Storage encryption feasibility | Met | Your answer: NVS encryption enabled (not verified) |
 | B8 | Minimal attack-surface design | Partial | `docs/hardening.md` present; `Dockerfile` exposes 3 ports incl. debug 8080 |
 | B9 | Default credential policy | Met | No default credentials in config; `README.md` documents first-boot pairing |
@@ -81,8 +98,8 @@ Automation & tooling: 4 met / 8 · Policy, design & documents: 13 met / 32
 | ID | Item | Status | Evidence / reason |
 |----|------|--------|-------------------|
 | D1 | Cybersecurity test plan | Partial | `test/` with `test_auth_*.cpp`; no written plan |
-| D2 | Evidence of SDL compliance | Met | Branch protection on `main`: 1 review, status checks; CI on `pull_request` (`ci.yml`) |
-| D3 | Pen testing / vulnerability assessment | Partial | CodeQL default setup: configured; secret scanning: enabled; no pentest in last 12 months (your answer) |
+| D2 | Process evidence from the repository | Met | CI on `pull_request` (`ci.yml`); branch protection on `main` (recommended practice, adopted) |
+| D3 | Regular security testing and review | Met | CodeQL default setup: configured; secret scanning: enabled. (Pentest: recommended practice, not adopted) |
 | D4 | Secure update mechanism | Partial | `sha256sums.txt` on release v2.3.1; no signatures or provenance; OTA verification not documented |
 | D5 | Data minimisation | Met | `docs/privacy.md`: telemetry opt-in, data inventory |
 
@@ -100,20 +117,20 @@ Automation & tooling: 4 met / 8 · Policy, design & documents: 13 met / 32
 | R9 | Technical file | Not met | Your answer: not started |
 | R10 | 10-year retention | Could not check | No retention doc; question skipped |
 | R11 | User-facing documentation | Partial | `README.md`/docs cover intended use, security properties, secure configuration, vulnerability reporting; missing support period |
-| R12 | Vulnerability disclosure contact | Met | `SECURITY.md` (security@acme-iot.example, 3-business-day acknowledgement); private vulnerability reporting: enabled |
+| R12 | Point of contact and CVD policy | Met | `SECURITY.md`: security@acme-iot.example plus a coordinated-disclosure section; private vulnerability reporting enabled (practice) |
 
 ### Stage 5 · After release
 | ID | Item | Status | Evidence / reason |
 |----|------|--------|-------------------|
 | P1 | Update risk assessment on change | Not met | Follows B3 |
-| P2 | Automated SBOM vuln monitoring | Met | Dependabot alerts enabled; `.github/dependabot.yml` (weekly) |
-| P3 | 24h initial report | Not met | No incident procedure; your answer: none |
-| P4 | 72h technical report | Not met | Follows P3 |
-| P5 | Final report 14 days | Not met | Follows P3 |
-| P6 | Severe incident reporting | Not met | Follows P3 |
-| P7 | Automatic update for 3rd-party vulns | Met | Dependabot security updates enabled; `release.yml` triggers on tag |
-| P8 | Security updates free of charge | Could not check | No statement in support docs; question skipped |
-| P9 | Advance notice of EOL | Could not check | No statement in support docs; question skipped |
+| P2 | Ongoing vulnerability identification | Met | Dependabot alerts enabled; `.github/dependabot.yml` (weekly) |
+| P3 | 24h early warning (vulnerability) | Not met | No incident procedure; your answer: none |
+| P4 | 72h notification | Not met | Follows P3 |
+| P5 | 14-day final report | Not met | Follows P3 |
+| P6 | Severe incident reporting (1-month final) | Not met | Follows P3 |
+| P7 | Remediation and delivery of updates | Met | `release.yml` triggers on tag; 2 published GitHub Security Advisories |
+| P8 | Free updates, kept available | Could not check | No statement in support docs; question skipped |
+| P9 | End-of-support notification | Could not check | No statement in support docs; question skipped |
 | P10 | Corrective measures | Could not check | No procedure; question skipped |
 
 ## What this assessment could not check
@@ -135,8 +152,10 @@ given the possible Important Class I feature.
 
 ## Notes and discrepancies
 
-- Scoring rule 5 fired (policy gap: 9 policy items not met). Automation track has 4 gaps
-  (B6, D3, D4, R1/R2), so clearing policy items alone would not reach B either.
+- Scoring rule 5 fired (policy gap: 9 policy items not met). Automation track has 3 gaps
+  (D4, R1, R2), so clearing policy items alone would not reach B either.
+- D3 is Met at baseline because CodeQL and secret scanning run on every change (Annex I
+  Pt II(3) "regular tests and reviews"). The pentest is listed under "Beyond the letter".
 - Your answer to Q1.4 ticked "manage or configure networks". If the thermostat only joins a
   Wi-Fi network as a client, this is probably not the Annex III category; if it configures
   other devices or the router, it may be. Worth a 15-minute check with the classification tool.
@@ -144,6 +163,7 @@ given the possible Important Class I feature.
   R3 and is a quick fix.
 
 ---
-*This is an automated readiness check against the 40-item manufacturer compliance matrix at
-cyberresilienceact.eu, based on Regulation (EU) 2024/2847. It is not legal advice and does not
-confirm compliance. Checklist version 2026.09, rules last reviewed 2026-09-03.*
+*This is an automated readiness check following the 40-item manufacturer compliance matrix at
+cyberresilienceact.eu, graded against the text of Regulation (EU) 2024/2847. Recommended
+practices are reported separately and are not legal requirements. It is not legal advice and
+does not confirm compliance. Rubric 2026.09.1, rules last reviewed 2026-09-03.*

@@ -44,9 +44,11 @@ hosted service only (SaaS) / mix.
 > Offer to continue.
 > If **library or SDK**: R3 (inbound connections) and B9 (default credentials) may be NA.
 
-**Q1.3** Is your company legally established in the EU? (yes / no / not sure) → F4
+**Q1.3** Is your company legally established in the EU? (yes / no / not sure) → F4, P3 (which CSIRT)
 > If **no**: Have you appointed an EU authorised representative by written mandate? (yes / no /
-> don't know)
+> don't know). Say plainly: the CRA makes this **optional** (Art. 18), but it is recommended for
+> non-EU companies because it decides which national CSIRT you report to and who holds your
+> documents in the EU.
 
 **Q1.4** Does the product do any of the following? Tick all that apply. → B1, B2
   - manage passwords or identities, or handle login for other systems
@@ -82,16 +84,19 @@ date / yes, but old / no / don't know) → B3, P1
 **Q2.3** Have you done a threat model (a structured "how would an attacker get in" exercise)?
 (yes, documented / done informally / no / don't know) → B4
 
-**Q2.4** Has the product had a penetration test or independent security assessment in the last
-12 months? (yes / more than 12 months ago / no / don't know) → D3
+**Q2.4** How is the product's security tested, and how often? (automated scans on every change /
+a recurring manual review / a one-off test / not at all / don't know) → D1, D3
+> Follow-up, recorded as a *recommended practice*, not a requirement: has there been an
+> independent penetration test in the last 12 months? (yes / no / don't know)
 
 **Q2.5** Have you decided how long you will provide free security updates, and written it down
 anywhere customers can see? (yes, with dates / decided but not published / no / don't know)
 → R5, P8, P9
 
 **Q2.6** Do you have a written incident response procedure that says who does what when a
-vulnerability is found, including notifying ENISA within 24 hours? (yes, mentions ENISA / yes,
-but no ENISA step / no / don't know) → P3, P4, P5, P6, P10
+vulnerability is found, including notifying ENISA within 24 hours and informing affected users?
+(yes, mentions ENISA / yes, but no ENISA step / no / don't know) → P3, P4, P5, P6, P10
+> If yes: does it also cover what happens if the company shuts down (Art. 13(23))? → P10
 
 **Q2.7** Have you started any of these formal steps? Tick all that apply. → R6, R7, R8, R9, R10
   - conformity assessment (self-assessment or with a Notified Body)
@@ -120,7 +125,7 @@ components? (yes / informal / no / don't know) → B5
 | "partly" / "in our heads" / "decided but not published" / "informal" / "yes, but old" / "yes, but no ENISA step" / "more than 12 months ago" | PARTIAL |
 | "no" / "none yet" / "on by default" (D5) / "yes, not encrypted" (B7) | NOT_MET |
 | "don't know" / "not sure" / skipped | UNKNOWN |
-| Q1.2 = library/SDK for R3, B9; Q1.3 = EU for F4; Q1.6 = no data for B7; Q2.10 = no telemetry for D5 | NA (record reason) |
+| Q1.2 = library/SDK for R3, B9; Q1.6 = no data for B7; Q2.10 = no telemetry for D5; F4 always unless a representative was appointed (then MET, informational) | NA (record reason) |
 
 If a repo file contradicts an answer (e.g. founder says "no SDL" but `docs/security/sdl.md`
 exists, or founder says "yes" but nothing is found for a `repo` item), prefer the repo evidence
