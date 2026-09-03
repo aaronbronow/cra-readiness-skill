@@ -47,6 +47,31 @@ git clone <this repo> cra-readiness-score
 cp -r cra-readiness-score ~/.claude/skills/        # or the path for your agent
 ```
 
+## Security properties and secure configuration
+
+What the collector does and does not do:
+
+- **Network:** contacts only `api.github.com` and `github.com`. No telemetry, no third-party
+  services, no uploads. Run with `--no-api` for a fully offline scan of a local checkout.
+- **Data:** reads files in the repository and public/authorised GitHub settings; writes only
+  the JSON output you ask for (`--out`) or stdout. Temporary clones are deleted unless
+  `--keep-clone` is given.
+- **Secrets:** the GitHub token is passed as an HTTP header, never placed in a URL or written
+  to output. Default-credential findings report the *variable name and line*, not the value.
+- **Authentication:** none of its own. It has no accounts, stores nothing, and listens on no ports.
+
+Secure configuration recommendations:
+
+- Use a **fine-grained personal access token** scoped to the single repository with
+  read-only `Contents`, `Metadata` and `Administration` permissions. `Administration: read`
+  is what allows branch protection and Dependabot alert settings to be read; without it those
+  items are reported as "could not check", never guessed.
+- Prefer `GITHUB_TOKEN`/`GH_TOKEN` environment variables or `gh auth` over `--token`, so the
+  token does not land in shell history.
+- Pin the release you install (`vX.Y.Z`) and verify it as described below.
+
+To report a vulnerability, see [`SECURITY.md`](SECURITY.md).
+
 ## Verifying a release
 
 Every tagged release ships with a SPDX SBOM, a `SHA256SUMS.txt`, and a Sigstore build-provenance

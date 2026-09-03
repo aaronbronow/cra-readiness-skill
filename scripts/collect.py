@@ -549,7 +549,7 @@ def scan_files(root, excludes=None):
         "has_support_doc": bool(sig["docs"]["support_policy"] or sig["key_files"].get("support_md")),
         "has_dates": bool(re.search(r"\b20[2-4]\d[-/.](0[1-9]|1[0-2])|\b(until|through|to)\s+(\w+\s+)?20[2-4]\d|\b\d+\s*years?\b", support_corpus)),
         "supported_versions_table": bool(re.search(r"supported versions|\|\s*version\s*\|", support_corpus, re.I)),
-        "free_security_updates": bool(re.search(r"(free|no (additional )?(cost|charge)|without charge).{0,80}(security )?(update|patch|fix)|(security )?(update|patch|fix)es?.{0,80}(free|no (additional )?(cost|charge))", support_corpus, re.I)),
+        "free_security_updates": bool(re.search(r"(free|no (additional )?(cost|charge)|without charge).{0,80}(security )?(update|patch|fix)(e?s)?|(security )?(update|patch|fix)(e?s)?.{0,80}(free|no (additional )?(cost|charge)|without charge)", support_corpus, re.I)),
         "twelve_month_notice": bool(re.search(r"(12|twelve)[- ]months?.{0,80}(notice|advance|before|announce)|(notice|advance|announce).{0,80}(12|twelve)[- ]months?", support_corpus, re.I)),
     }
 
