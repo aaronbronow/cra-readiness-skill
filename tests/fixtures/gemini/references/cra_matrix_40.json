@@ -1,0 +1,367 @@
+{
+  "framework": "EU Cyber Resilience Act (Regulation EU 2024/2847)",
+  "target_persona": "Startup Founders & Software Manufacturers",
+  "total_items": 40,
+  "stages": [
+    {
+      "id": 1,
+      "name": "Foundations",
+      "title": "Company-level foundations",
+      "note": "Organisational requirements that must be in place before any product-specific work begins.",
+      "items": [
+        {
+          "id": "F.1",
+          "title": "Documented Security Development Lifecycle",
+          "description": "Maintain a documented SDL defining phases, roles and responsibilities. External certification (IEC 62443-4-1, ISO/IEC 27001) is optional but creates a presumption of conformity.",
+          "article": "Art. 13(1) · Annex I",
+          "category": "policy_document",
+          "signals": ["docs/SECURITY_DEVELOPMENT_LIFECYCLE.md", "docs/SDL.md", "SECURITY.md", "CONTRIBUTING.md", "compliance/sdl.md"]
+        },
+        {
+          "id": "F.2",
+          "title": "Evidence of conformity with the SDL",
+          "description": "Where no external certification is held, keep documented evidence of internal conformity with the SDL.",
+          "article": "Annex I · Pt I",
+          "category": "policy_document",
+          "signals": ["docs/sdl-audit.md", "audit/", "compliance/sdl-records.md"]
+        },
+        {
+          "id": "F.3",
+          "title": "SDL covers secure-by-design and secure-by-default",
+          "description": "The SDL must explicitly address how the product minimises its attack surface without configuration by the end user.",
+          "article": "Annex I · I(2)(3)",
+          "category": "policy_document",
+          "signals": ["docs/secure-by-design.md", "docs/architecture.md"]
+        },
+        {
+          "id": "F.4",
+          "title": "EU Authorised Representative (non-EU manufacturers)",
+          "description": "Manufacturers outside the EU must designate, by written mandate, a representative established in the EU, named in the technical documentation and the DoC.",
+          "article": "Art. 19",
+          "category": "policy_document",
+          "signals": ["CRA.md", "EU_REPRESENTATIVE.md", "compliance/authorised-rep.md"]
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Before development",
+      "title": "Before development begins",
+      "note": "Classification, risk assessment and technical prerequisites set the scope for everything that follows.",
+      "items": [
+        {
+          "id": "B.1",
+          "title": "Determine product classification",
+          "description": "Identify whether the product is Default, Important Class I/II or Critical (Annexes III & IV). Classification determines the conformity assessment route.",
+          "article": "Annex III/IV",
+          "category": "policy_document",
+          "signals": ["CRA.md", "docs/cra-classification.md", "cra-manifest.json"]
+        },
+        {
+          "id": "B.2",
+          "title": "Identify the conformity assessment route",
+          "description": "Default: Module A self-assessment. Important Class I: Module A with a harmonised standard, else B+C or H. Important Class II & Critical: always via a Notified Body. Lead times of 4–10 months are common.",
+          "article": "Art. 32 · Annex VIII",
+          "category": "policy_document",
+          "signals": ["CRA.md", "docs/conformity-assessment.md", "cra-manifest.json"]
+        },
+        {
+          "id": "B.3",
+          "title": "Product-specific cybersecurity risk assessment",
+          "description": "Perform a risk assessment before development. Retain all versions; the initial pre-development version is part of the technical documentation.",
+          "article": "Annex I · I(1)",
+          "category": "policy_document",
+          "signals": ["docs/risk-assessment.md", "docs/threat-model.md", "docs/security/risk.md"]
+        },
+        {
+          "id": "B.4",
+          "title": "Threat modelling",
+          "description": "Identify attack surface, threat actors, attack vectors and resulting security requirements. Document the methodology used.",
+          "article": "Annex I · I(1)",
+          "category": "policy_document",
+          "signals": ["docs/threat-model.md", "docs/architecture/threat-model.md"]
+        },
+        {
+          "id": "B.5",
+          "title": "Third-party & open-source component policy",
+          "description": "Define how third-party and open-source components are selected, evaluated and approved, including minimum EOL and vulnerability-response obligations.",
+          "article": "Annex I · Pt II",
+          "category": "policy_document",
+          "signals": ["docs/dependency-policy.md", "docs/open-source-policy.md", "package.json", "go.mod", "Cargo.toml", "Gemfile", "requirements.txt", "pyproject.toml"]
+        },
+        {
+          "id": "B.6",
+          "title": "EOL check for tools and dependencies",
+          "description": "Check the End-of-Life date of all key tools, kernels, databases and libraries. Avoid components whose EOL falls within the product's support lifetime.",
+          "article": "Annex I · Pt II",
+          "category": "automation",
+          "signals": [".github/workflows/dependabot.yml", ".github/dependabot.yml", "renovate.json", ".github/workflows/dependency-review.yml"]
+        },
+        {
+          "id": "B.7",
+          "title": "Storage encryption feasibility",
+          "description": "Confirm the target hardware/runtime supports encryption of data at rest; a mandatory requirement that may force architectural adjustments.",
+          "article": "Annex I · I(4)(e)",
+          "category": "policy_document",
+          "signals": ["docs/encryption.md", "docs/architecture.md", "schema.prisma", "db/migrate"]
+        },
+        {
+          "id": "B.8",
+          "title": "Minimal attack-surface design",
+          "description": "Plan to remove or disable by default every interface, service, port and protocol not required for the intended function.",
+          "article": "Annex I · I(2)(b)",
+          "category": "automation",
+          "signals": ["Dockerfile", "docker-compose.yml", "compose.yaml", "k8s/", "helm/"]
+        },
+        {
+          "id": "B.9",
+          "title": "Default credential policy",
+          "description": "Ship with no default passwords, or force the user to set a unique credential on first use.",
+          "article": "Annex I · I(2)(c)",
+          "category": "policy_document",
+          "signals": ["config/", "docs/authentication.md", ".env.example"]
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "During development",
+      "title": "During development",
+      "note": "Secure coding, testing and the update mechanism, evidenced throughout the build.",
+      "items": [
+        {
+          "id": "D.1",
+          "title": "Cybersecurity-focused test plan",
+          "description": "Test cases targeting authentication, access control, input validation, encryption and error handling. Documented and retained in the technical file.",
+          "article": "Annex I · I(1)",
+          "category": "automation",
+          "signals": [".github/workflows/test.yml", ".github/workflows/ci.yml", ".github/workflows/tests.yaml", ".github/workflows/tests.yml", ".github/workflows/*test*.y*ml", "tests/", "test/", "spec/"]
+        },
+        {
+          "id": "D.2",
+          "title": "Evidence of SDL compliance",
+          "description": "Demonstrate, with documented evidence, that the SDL was followed at each phase.",
+          "article": "Annex I · Pt I",
+          "category": "policy_document",
+          "signals": ["docs/sdl-evidence.md", "CHANGELOG.md", ".github/PULL_REQUEST_TEMPLATE.md"]
+        },
+        {
+          "id": "D.3",
+          "title": "Penetration testing / vulnerability assessment",
+          "description": "Conduct security testing on the product or a representative build before release (DAST/SAST/Pen-test).",
+          "article": "Annex I · I(1)",
+          "category": "automation",
+          "signals": [".github/workflows/*codeql*.y*ml", ".github/workflows/*scorecard*.y*ml", ".github/workflows/*security*.y*ml", ".github/workflows/*snyk*.y*ml", ".github/workflows/*semgrep*.y*ml"]
+        },
+        {
+          "id": "D.4",
+          "title": "Secure software update mechanism",
+          "description": "An authenticated, integrity-verified update mechanism, verifiable by the device before installation and automatic where feasible.",
+          "article": "Annex I · I(2)(f)",
+          "category": "automation",
+          "signals": [".github/workflows/*release*.y*ml", ".goreleaser.yml", "goreleaser.yml", ".github/workflows/publish.yml"]
+        },
+        {
+          "id": "D.5",
+          "title": "Data minimisation",
+          "description": "Collect, process and store only the data strictly necessary for the intended function.",
+          "article": "Annex I · I(4)(f)",
+          "category": "policy_document",
+          "signals": ["docs/privacy.md", "docs/data-minimisation.md", "PRIVACY.md"]
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Before release",
+      "title": "Before product release",
+      "note": "SBOM, network audit, EOL, conformity assessment, CE marking and the technical file.",
+      "items": [
+        {
+          "id": "R.1",
+          "title": "SBOM prepared and vulnerability-screened",
+          "description": "Prepare an SBOM covering at least all top-level dependencies and verify no component carries a known, already-patched vulnerability. Including a resolved CVE is a direct violation.",
+          "article": "Annex I · II(1)",
+          "category": "automation",
+          "signals": ["sbom.json", "sbom.xml", ".github/workflows/sbom.yml", "cyclonedx.json"]
+        },
+        {
+          "id": "R.2",
+          "title": "SBOM in machine-readable format",
+          "description": "Store the SBOM as SPDX or CycloneDX (JSON/XML). PDF may be rejected as non-machine-readable.",
+          "article": "Annex I · Pt II",
+          "category": "automation",
+          "signals": ["sbom.spdx.json", "cyclonedx.json", "bom.json", ".github/workflows/sbom.yml"]
+        },
+        {
+          "id": "R.3",
+          "title": "Inbound connections list",
+          "description": "List and individually justify every inbound connection and open port; remove or disable by default anything not required.",
+          "article": "Annex I · I(2)(b)",
+          "category": "policy_document",
+          "signals": ["docs/network-architecture.md", "docs/ports-and-protocols.md", "Dockerfile", "docker-compose.yml"]
+        },
+        {
+          "id": "R.4",
+          "title": "Outbound connections list",
+          "description": "Audit and justify all outbound connections, including those from the OS, third-party libraries and telemetry.",
+          "article": "Annex I · Pt I",
+          "category": "policy_document",
+          "signals": ["docs/network-architecture.md", "docs/outbound-traffic.md", "docs/telemetry.md"]
+        },
+        {
+          "id": "R.5",
+          "title": "Declare the product End-of-Life",
+          "description": "Calculate and declare the EOL; it cannot exceed the EOL of key dependencies. Minimum 5-year support period unless the expected use lifetime is shorter.",
+          "article": "Art. 13(8)",
+          "category": "policy_document",
+          "signals": ["CRA.md", "SECURITY.md", "SUPPORT.md", "docs/support-lifecycle.md"]
+        },
+        {
+          "id": "R.6",
+          "title": "Complete the conformity assessment",
+          "description": "Carry out the applicable procedure (Module A, or B+C / H / Notified Body) and document it before affixing CE marking.",
+          "article": "Art. 32",
+          "category": "policy_document",
+          "signals": ["compliance/conformity-assessment.md", "docs/conformity.md", "CRA.md"]
+        },
+        {
+          "id": "R.7",
+          "title": "Prepare the EU Declaration of Conformity",
+          "description": "Draft and sign the DoC per Annex V, referencing the regulation, product and assessment procedure. Keep available for 10 years.",
+          "article": "Art. 28 · Annex V",
+          "category": "policy_document",
+          "signals": ["compliance/DECLARATION_OF_CONFORMITY.md", "docs/DoC.md", "CRA.md"]
+        },
+        {
+          "id": "R.8",
+          "title": "Affix the CE marking",
+          "description": "Apply visible, legible, indelible CE marking. No CE marking, no EU market from 11 Dec 2027.",
+          "article": "Art. 30",
+          "category": "policy_document",
+          "signals": ["docs/ce-marking.md", "README.md", "packaging/ce-mark.svg"]
+        },
+        {
+          "id": "R.9",
+          "title": "Compile the technical file",
+          "description": "Assemble the Annex VII package: description, risk assessment, SDL evidence, test results, SBOM, connection audits, DoC and EOL declaration.",
+          "article": "Art. 31 · Annex VII",
+          "category": "policy_document",
+          "signals": ["compliance/technical-file/", "docs/technical-file.md", "compliance/"]
+        },
+        {
+          "id": "R.10",
+          "title": "10-year retention plan",
+          "description": "Archive all technical documentation, including every SBOM version, for at least 10 years from first market placement.",
+          "article": "Art. 31(3)",
+          "category": "policy_document",
+          "signals": ["compliance/retention-policy.md", "docs/retention.md", "CRA.md"]
+        },
+        {
+          "id": "R.11",
+          "title": "User-facing documentation",
+          "description": "Communicate intended use, cybersecurity properties, how to configure security, the declared EOL and how to report vulnerabilities.",
+          "article": "Annex II · Art. 13(18)",
+          "category": "policy_document",
+          "signals": ["README.md", "docs/", "USER_GUIDE.md"]
+        },
+        {
+          "id": "R.12",
+          "title": "Vulnerability disclosure contact published",
+          "description": "Publish a single, actively monitored point of contact for reporting vulnerabilities.",
+          "article": "Art. 13(5)",
+          "category": "policy_document",
+          "signals": ["SECURITY.md", ".github/SECURITY.md"]
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "After release",
+      "title": "After product release",
+      "note": "Ongoing monitoring, the Article 14 reporting timeline and update obligations across the support period.",
+      "items": [
+        {
+          "id": "A.1",
+          "title": "Update risk assessment on significant change",
+          "description": "Reassess when a major product change, significant new threat or exploited vulnerability is identified; document the trigger and outcome.",
+          "article": "Annex I · I(1)",
+          "category": "policy_document",
+          "signals": ["docs/risk-assessment.md", "compliance/change-management.md"]
+        },
+        {
+          "id": "A.2",
+          "title": "Automated SBOM vulnerability monitoring",
+          "description": "Deploy tooling that monitors SBOM components against live feeds (NVD, EUVD, OSV) frequently enough to meet the 24-hour reporting window. Manual monitoring is insufficient.",
+          "article": "Art. 14",
+          "category": "automation",
+          "signals": [".github/workflows/dependabot.yml", ".github/dependabot.yml", "renovate.json", ".github/workflows/security.yml"]
+        },
+        {
+          "id": "A.3",
+          "title": "24-hour initial vulnerability report",
+          "description": "On becoming aware of an actively exploited vulnerability, file an initial report within 24 hours via ENISA's single reporting platform. Applies from 11 Sep 2026.",
+          "article": "Art. 14(2)",
+          "category": "policy_document",
+          "signals": ["SECURITY.md", "docs/incident-response.md", "compliance/vulnerability-reporting.md"]
+        },
+        {
+          "id": "A.4",
+          "title": "72-hour technical report",
+          "description": "Submit a detailed technical report to ENISA and the national CSIRT within 72 hours, including severity and any mitigation.",
+          "article": "Art. 14(3)",
+          "category": "policy_document",
+          "signals": ["SECURITY.md", "docs/incident-response.md", "compliance/vulnerability-reporting.md"]
+        },
+        {
+          "id": "A.5",
+          "title": "Final report within 14 days of remediation",
+          "description": "Submit a final report no later than 14 days after a security update or workaround is made available.",
+          "article": "Art. 14(4)",
+          "category": "policy_document",
+          "signals": ["SECURITY.md", "docs/incident-response.md"]
+        },
+        {
+          "id": "A.6",
+          "title": "Severe incident reporting",
+          "description": "Report severe incidents affecting product security on the same 24/72-hour timeline.",
+          "article": "Art. 14(2)",
+          "category": "policy_document",
+          "signals": ["SECURITY.md", "docs/incident-response.md"]
+        },
+        {
+          "id": "A.7",
+          "title": "Automatic update for third-party vulnerabilities",
+          "description": "Maintain an automatic update system able to patch third-party component vulnerabilities. A fix within 24 hours exempts reporting, not fixing.",
+          "article": "Art. 14(2)(a)",
+          "category": "automation",
+          "signals": [".github/dependabot.yml", "renovate.json", ".github/workflows/auto-update.yml"]
+        },
+        {
+          "id": "A.8",
+          "title": "Security updates free of charge",
+          "description": "Provide all security updates free of charge for the duration of the support period.",
+          "article": "Art. 13(9)",
+          "category": "policy_document",
+          "signals": ["SECURITY.md", "SUPPORT.md", "CRA.md"]
+        },
+        {
+          "id": "A.9",
+          "title": "Advance notice of End-of-Life",
+          "description": "Notify users at least 12 months before the final security update, where feasible.",
+          "article": "Art. 13(8)",
+          "category": "policy_document",
+          "signals": ["SECURITY.md", "SUPPORT.md", "CRA.md"]
+        },
+        {
+          "id": "A.10",
+          "title": "Corrective measures for non-compliant products",
+          "description": "Remediate, withdraw or recall non-compliant products and notify market surveillance. Inaction is itself a violation.",
+          "article": "Art. 13(14)",
+          "category": "policy_document",
+          "signals": ["compliance/corrective-actions.md", "docs/recalls.md"]
+        }
+      ]
+    }
+  ]
+}

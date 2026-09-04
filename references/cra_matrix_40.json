@@ -1,0 +1,704 @@
+{
+  "framework": "EU Cyber Resilience Act (Regulation EU 2024/2847)",
+  "target_persona": "Startup Founders & Software Manufacturers",
+  "total_items": 40,
+  "stages": [
+    {
+      "id": 1,
+      "name": "Foundations",
+      "title": "Company-level foundations",
+      "note": "Organisational requirements that must be in place before any product-specific work begins.",
+      "items": [
+        {
+          "id": "F.1",
+          "title": "Documented Security Development Lifecycle",
+          "description": "Maintain a documented SDL defining phases, roles and responsibilities. External certification (IEC 62443-4-1, ISO/IEC 27001) is optional but creates a presumption of conformity.",
+          "article": "Art. 13(1) \u00b7 Annex I",
+          "category": "policy_document",
+          "signals": [
+            "docs/SECURITY_DEVELOPMENT_LIFECYCLE.md",
+            "docs/SDL.md",
+            "SECURITY.md",
+            "CONTRIBUTING.md",
+            "compliance/sdl.md"
+          ],
+          "tier": "inferrable",
+          "primary_doc": "SECURITY.md",
+          "inference_criteria": "Verify if the project documents a secure development lifecycle (SDL) or guidelines covering security review, testing, and contribution policies.",
+          "interview_prompt": "Do you have a documented Security Development Lifecycle (SDL) or security practices that your engineering team follows?"
+        },
+        {
+          "id": "F.2",
+          "title": "Evidence of conformity with the SDL",
+          "description": "Where no external certification is held, keep documented evidence of internal conformity with the SDL.",
+          "article": "Annex I \u00b7 Pt I",
+          "category": "policy_document",
+          "signals": [
+            "docs/sdl-audit.md",
+            "audit/",
+            "compliance/sdl-records.md"
+          ],
+          "tier": "attestation",
+          "primary_doc": "compliance/sdl-records.md",
+          "inference_criteria": "Verify documented internal audit or checklist evidence confirming the development team follows the SDL.",
+          "interview_prompt": "Do you maintain internal evidence/checklists demonstrating your team follows your secure development process?"
+        },
+        {
+          "id": "F.3",
+          "title": "SDL covers secure-by-design and secure-by-default",
+          "description": "The SDL must explicitly address how the product minimises its attack surface without configuration by the end user.",
+          "article": "Annex I \u00b7 I(2)(3)",
+          "category": "policy_document",
+          "signals": [
+            "docs/secure-by-design.md",
+            "docs/architecture.md"
+          ],
+          "tier": "inferrable",
+          "primary_doc": "docs/secure-by-design.md",
+          "inference_criteria": "Verify if documentation explains how the product is secure by default (e.g., minimal open ports, least privilege, safe default settings).",
+          "interview_prompt": "Is your software designed and configured to be secure-by-default out of the box without requiring manual security hardening by the user?"
+        },
+        {
+          "id": "F.4",
+          "title": "EU Authorised Representative (non-EU manufacturers)",
+          "description": "Manufacturers outside the EU must designate, by written mandate, a representative established in the EU, named in the technical documentation and the DoC.",
+          "article": "Art. 19",
+          "category": "policy_document",
+          "signals": [
+            "CRA.md",
+            "EU_REPRESENTATIVE.md",
+            "compliance/authorised-rep.md"
+          ],
+          "tier": "attestation",
+          "primary_doc": "CRA.md",
+          "inference_criteria": "Verify if a written mandate appointing an EU Authorised Representative is declared, or if the manufacturer is established in the EU (making this N/A).",
+          "interview_prompt": "If your company is based outside the EU, have you appointed an EU Authorised Representative with a written mandate (or are you established in the EU)?"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Before development",
+      "title": "Before development begins",
+      "note": "Classification, risk assessment and technical prerequisites set the scope for everything that follows.",
+      "items": [
+        {
+          "id": "B.1",
+          "title": "Determine product classification",
+          "description": "Identify whether the product is Default, Important Class I/II or Critical (Annexes III & IV). Classification determines the conformity assessment route.",
+          "article": "Annex III/IV",
+          "category": "policy_document",
+          "signals": [
+            "CRA.md",
+            "docs/cra-classification.md",
+            "cra-manifest.json"
+          ],
+          "tier": "inferrable",
+          "primary_doc": "CRA.md",
+          "inference_criteria": "Verify if the product classification is documented (Default / Class I / Class II / Critical) according to CRA Annexes III & IV.",
+          "interview_prompt": "Have you verified whether your product qualifies as a standard Default digital product under CRA (vs. Important Class I/II or Critical)?"
+        },
+        {
+          "id": "B.2",
+          "title": "Identify the conformity assessment route",
+          "description": "Default: Module A self-assessment. Important Class I: Module A with a harmonised standard, else B+C or H. Important Class II & Critical: always via a Notified Body. Lead times of 4\u201310 months are common.",
+          "article": "Art. 32 \u00b7 Annex VIII",
+          "category": "policy_document",
+          "signals": [
+            "CRA.md",
+            "docs/conformity-assessment.md",
+            "cra-manifest.json"
+          ],
+          "tier": "inferrable",
+          "primary_doc": "CRA.md",
+          "inference_criteria": "Verify if the conformity assessment route is identified (Module A internal control for Default products vs. third-party certification).",
+          "interview_prompt": "Is your conformity assessment route confirmed as Module A (internal control self-assessment)?"
+        },
+        {
+          "id": "B.3",
+          "title": "Product-specific cybersecurity risk assessment",
+          "description": "Perform a risk assessment before development. Retain all versions; the initial pre-development version is part of the technical documentation.",
+          "article": "Annex I \u00b7 I(1)",
+          "category": "policy_document",
+          "signals": [
+            "docs/risk-assessment.md",
+            "docs/threat-model.md",
+            "docs/security/risk.md"
+          ],
+          "tier": "inferrable",
+          "primary_doc": "docs/risk-assessment.md",
+          "inference_criteria": "Verify if a product-specific cybersecurity risk assessment is recorded covering intended use and foreseeable misuse.",
+          "interview_prompt": "Have you performed and documented a cybersecurity risk assessment for this product?"
+        },
+        {
+          "id": "B.4",
+          "title": "Threat modelling",
+          "description": "Identify attack surface, threat actors, attack vectors and resulting security requirements. Document the methodology used.",
+          "article": "Annex I \u00b7 I(1)",
+          "category": "policy_document",
+          "signals": [
+            "docs/threat-model.md",
+            "docs/architecture/threat-model.md"
+          ],
+          "tier": "inferrable",
+          "primary_doc": "docs/threat-model.md",
+          "inference_criteria": "Verify if threat modelling documentation exists outlining entry points, trust boundaries, and mitigations.",
+          "interview_prompt": "Does the engineering team maintain a documented threat model for the application architecture?"
+        },
+        {
+          "id": "B.5",
+          "title": "Third-party & open-source component policy",
+          "description": "Define how third-party and open-source components are selected, evaluated and approved, including minimum EOL and vulnerability-response obligations.",
+          "article": "Annex I \u00b7 Pt II",
+          "category": "policy_document",
+          "signals": [
+            "docs/dependency-policy.md",
+            "docs/open-source-policy.md",
+            "package.json",
+            "go.mod",
+            "Cargo.toml",
+            "Gemfile",
+            "requirements.txt",
+            "pyproject.toml"
+          ],
+          "tier": "attestation",
+          "primary_doc": "docs/dependency-policy.md",
+          "inference_criteria": "Verify whether guidelines exist for evaluating third-party and open-source dependencies for security and license risks before adoption.",
+          "interview_prompt": "Do you follow a documented policy for screening and approving third-party libraries and dependencies before adding them?"
+        },
+        {
+          "id": "B.6",
+          "title": "EOL check for tools and dependencies",
+          "description": "Check the End-of-Life date of all key tools, kernels, databases and libraries. Avoid components whose EOL falls within the product's support lifetime.",
+          "article": "Annex I \u00b7 Pt II",
+          "category": "automation",
+          "signals": [
+            ".github/workflows/dependabot.yml",
+            ".github/dependabot.yml",
+            "renovate.json",
+            ".github/workflows/dependency-review.yml"
+          ],
+          "tier": "deterministic",
+          "primary_doc": ".github/dependabot.yml",
+          "inference_criteria": "Deterministic check: automated dependency EOL and vulnerability screening tool configuration.",
+          "interview_prompt": "Do you run automated tools (Dependabot, Renovate, Snyk) to monitor dependencies and runtimes for end-of-life?"
+        },
+        {
+          "id": "B.7",
+          "title": "Storage encryption feasibility",
+          "description": "Confirm the target hardware/runtime supports encryption of data at rest; a mandatory requirement that may force architectural adjustments.",
+          "article": "Annex I \u00b7 I(4)(e)",
+          "category": "policy_document",
+          "signals": [
+            "docs/encryption.md",
+            "docs/architecture.md",
+            "schema.prisma",
+            "db/migrate"
+          ],
+          "tier": "inferrable",
+          "primary_doc": "docs/encryption.md",
+          "inference_criteria": "Verify documentation assessing storage encryption feasibility for data at rest and data in transit.",
+          "interview_prompt": "Is sensitive user data encrypted at rest and in transit, with encryption feasibility documented?"
+        },
+        {
+          "id": "B.8",
+          "title": "Minimal attack-surface design",
+          "description": "Plan to remove or disable by default every interface, service, port and protocol not required for the intended function.",
+          "article": "Annex I \u00b7 I(2)(b)",
+          "category": "automation",
+          "signals": [
+            "Dockerfile",
+            "docker-compose.yml",
+            "compose.yaml",
+            "k8s/",
+            "helm/"
+          ],
+          "tier": "deterministic",
+          "primary_doc": "Dockerfile",
+          "inference_criteria": "Deterministic check: container least privilege (non-root USER), minimal base images, and absence of development debug servers in production.",
+          "interview_prompt": "Are production containers and services configured with minimal attack surface (non-root user, unused ports closed)?"
+        },
+        {
+          "id": "B.9",
+          "title": "Default credential policy",
+          "description": "Ship with no default passwords, or force the user to set a unique credential on first use.",
+          "article": "Annex I \u00b7 I(2)(c)",
+          "category": "policy_document",
+          "signals": [
+            "config/",
+            "docs/authentication.md",
+            ".env.example"
+          ],
+          "tier": "inferrable",
+          "primary_doc": ".env.example",
+          "inference_criteria": "Verify that no default or hardcoded passwords exist; initial secrets must be generated or set by the user upon initialization.",
+          "interview_prompt": "Does your application strictly prohibit hardcoded default credentials and require user-supplied passwords/tokens?"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "During development",
+      "title": "During development",
+      "note": "Secure coding, testing and the update mechanism, evidenced throughout the build.",
+      "items": [
+        {
+          "id": "D.1",
+          "title": "Cybersecurity-focused test plan",
+          "description": "Test cases targeting authentication, access control, input validation, encryption and error handling. Documented and retained in the technical file.",
+          "article": "Annex I \u00b7 I(1)",
+          "category": "automation",
+          "signals": [
+            ".github/workflows/test.yml",
+            ".github/workflows/ci.yml",
+            ".github/workflows/tests.yaml",
+            ".github/workflows/tests.yml",
+            ".github/workflows/*test*.y*ml",
+            "tests/",
+            "test/",
+            "spec/"
+          ],
+          "tier": "deterministic",
+          "primary_doc": ".github/workflows/tests.yml",
+          "inference_criteria": "Deterministic check: automated CI test pipeline configured and passing on pull requests and pushes.",
+          "interview_prompt": "Do you run automated security and functional tests on every pull request?"
+        },
+        {
+          "id": "D.2",
+          "title": "Evidence of SDL compliance",
+          "description": "Demonstrate, with documented evidence, that the SDL was followed at each phase.",
+          "article": "Annex I \u00b7 Pt I",
+          "category": "policy_document",
+          "signals": [
+            "docs/sdl-evidence.md",
+            "CHANGELOG.md",
+            ".github/PULL_REQUEST_TEMPLATE.md"
+          ],
+          "tier": "attestation",
+          "primary_doc": ".github/pull_request_template.md",
+          "inference_criteria": "Verify branch protection and mandatory peer code review before merging changes to release branches.",
+          "interview_prompt": "Do you enforce mandatory peer code review and branch protection on your default branch?"
+        },
+        {
+          "id": "D.3",
+          "title": "Penetration testing / vulnerability assessment",
+          "description": "Conduct security testing on the product or a representative build before release (DAST/SAST/Pen-test).",
+          "article": "Annex I \u00b7 I(1)",
+          "category": "automation",
+          "signals": [
+            ".github/workflows/*codeql*.y*ml",
+            ".github/workflows/*scorecard*.y*ml",
+            ".github/workflows/*security*.y*ml",
+            ".github/workflows/*snyk*.y*ml",
+            ".github/workflows/*semgrep*.y*ml"
+          ],
+          "tier": "deterministic",
+          "primary_doc": ".github/workflows/codeql.yml",
+          "inference_criteria": "Deterministic check: SAST, DAST, or secret scanning automated pipeline (CodeQL, Semgrep, Trivy, Gitleaks).",
+          "interview_prompt": "Do you run automated code security scanners (CodeQL, SAST, secret detection) in CI?"
+        },
+        {
+          "id": "D.4",
+          "title": "Secure software update mechanism",
+          "description": "An authenticated, integrity-verified update mechanism, verifiable by the device before installation and automatic where feasible.",
+          "article": "Annex I \u00b7 I(2)(f)",
+          "category": "automation",
+          "signals": [
+            ".github/workflows/*release*.y*ml",
+            ".goreleaser.yml",
+            "goreleaser.yml",
+            ".github/workflows/publish.yml"
+          ],
+          "tier": "deterministic",
+          "primary_doc": ".github/workflows/release.yml",
+          "inference_criteria": "Deterministic check: automated, authenticated release workflow with cryptographic checksums or signatures.",
+          "interview_prompt": "Are software releases built through an automated, authenticated release pipeline with signed checksums?"
+        },
+        {
+          "id": "D.5",
+          "title": "Data minimisation",
+          "description": "Collect, process and store only the data strictly necessary for the intended function.",
+          "article": "Annex I \u00b7 I(4)(f)",
+          "category": "policy_document",
+          "signals": [
+            "docs/privacy.md",
+            "docs/data-minimisation.md",
+            "PRIVACY.md"
+          ],
+          "tier": "inferrable",
+          "primary_doc": "docs/privacy.md",
+          "inference_criteria": "Verify data minimisation statement ensuring only strictly necessary telemetry or user data is processed.",
+          "interview_prompt": "Does your product enforce data minimisation, processing only personal or operational data strictly necessary for functionality?"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Before release",
+      "title": "Before product release",
+      "note": "SBOM, network audit, EOL, conformity assessment, CE marking and the technical file.",
+      "items": [
+        {
+          "id": "R.1",
+          "title": "SBOM prepared and vulnerability-screened",
+          "description": "Prepare an SBOM covering at least all top-level dependencies and verify no component carries a known, already-patched vulnerability. Including a resolved CVE is a direct violation.",
+          "article": "Annex I \u00b7 II(1)",
+          "category": "automation",
+          "signals": [
+            "sbom.json",
+            "sbom.xml",
+            ".github/workflows/sbom.yml",
+            "cyclonedx.json"
+          ],
+          "tier": "deterministic",
+          "primary_doc": ".github/workflows/cra-ci-sbom.yml",
+          "inference_criteria": "Deterministic check: SBOM generated automatically during build and screened for known CVEs.",
+          "interview_prompt": "Do you generate an automated Software Bill of Materials (SBOM) for every release and check it for known vulnerabilities?"
+        },
+        {
+          "id": "R.2",
+          "title": "SBOM in machine-readable format",
+          "description": "Store the SBOM as SPDX or CycloneDX (JSON/XML). PDF may be rejected as non-machine-readable.",
+          "article": "Annex I \u00b7 Pt II",
+          "category": "automation",
+          "signals": [
+            "sbom.spdx.json",
+            "cyclonedx.json",
+            "bom.json",
+            ".github/workflows/sbom.yml"
+          ],
+          "tier": "deterministic",
+          "primary_doc": "sbom.cyclonedx.json",
+          "inference_criteria": "Deterministic check: SBOM exported in standard machine-readable format (CycloneDX or SPDX JSON).",
+          "interview_prompt": "Is your SBOM exported in an industry standard format (CycloneDX or SPDX JSON)?"
+        },
+        {
+          "id": "R.3",
+          "title": "Inbound connections list",
+          "description": "List and individually justify every inbound connection and open port; remove or disable by default anything not required.",
+          "article": "Annex I \u00b7 I(2)(b)",
+          "category": "policy_document",
+          "signals": [
+            "docs/network-architecture.md",
+            "docs/ports-and-protocols.md",
+            "Dockerfile",
+            "docker-compose.yml"
+          ],
+          "tier": "inferrable",
+          "primary_doc": "README.md",
+          "inference_criteria": "Verify documentation listing all inbound network ports, listening services, and justification.",
+          "interview_prompt": "Do you document all listening ports and incoming network connections required by your software?"
+        },
+        {
+          "id": "R.4",
+          "title": "Outbound connections list",
+          "description": "Audit and justify all outbound connections, including those from the OS, third-party libraries and telemetry.",
+          "article": "Annex I \u00b7 Pt I",
+          "category": "policy_document",
+          "signals": [
+            "docs/network-architecture.md",
+            "docs/outbound-traffic.md",
+            "docs/telemetry.md"
+          ],
+          "tier": "inferrable",
+          "primary_doc": "README.md",
+          "inference_criteria": "Verify documentation listing all outbound network endpoints, telemetry destinations, and remote APIs contacted.",
+          "interview_prompt": "Do you document all outbound endpoints, third-party APIs, and external servers contacted by your application?"
+        },
+        {
+          "id": "R.5",
+          "title": "Declare the product End-of-Life",
+          "description": "Calculate and declare the EOL; it cannot exceed the EOL of key dependencies. Minimum 5-year support period unless the expected use lifetime is shorter.",
+          "article": "Art. 13(8)",
+          "category": "policy_document",
+          "signals": [
+            "CRA.md",
+            "SECURITY.md",
+            "SUPPORT.md",
+            "docs/support-lifecycle.md"
+          ],
+          "tier": "inferrable",
+          "primary_doc": "CRA.md",
+          "inference_criteria": "Verify explicit declaration of support period / End-of-Life date (at least 5 years unless product expected lifetime is shorter).",
+          "interview_prompt": "Have you published a declared End-of-Life (EOL) support date guaranteeing at least 5 years of security updates?"
+        },
+        {
+          "id": "R.6",
+          "title": "Complete the conformity assessment",
+          "description": "Carry out the applicable procedure (Module A, or B+C / H / Notified Body) and document it before affixing CE marking.",
+          "article": "Art. 32",
+          "category": "policy_document",
+          "signals": [
+            "compliance/conformity-assessment.md",
+            "docs/conformity.md",
+            "CRA.md"
+          ],
+          "tier": "inferrable",
+          "primary_doc": "CRA.md",
+          "inference_criteria": "Verify record of completed conformity assessment procedure (Module A verification).",
+          "interview_prompt": "Have you completed and signed off on your internal conformity assessment record?"
+        },
+        {
+          "id": "R.7",
+          "title": "Prepare the EU Declaration of Conformity",
+          "description": "Draft and sign the DoC per Annex V, referencing the regulation, product and assessment procedure. Keep available for 10 years.",
+          "article": "Art. 28 \u00b7 Annex V",
+          "category": "policy_document",
+          "signals": [
+            "compliance/DECLARATION_OF_CONFORMITY.md",
+            "docs/DoC.md",
+            "CRA.md"
+          ],
+          "tier": "inferrable",
+          "primary_doc": "CRA.md",
+          "inference_criteria": "Verify formal EU Declaration of Conformity drafted containing CRA Annex V required elements.",
+          "interview_prompt": "Has your company drafted and approved an EU Declaration of Conformity (DoC)?"
+        },
+        {
+          "id": "R.8",
+          "title": "Affix the CE marking",
+          "description": "Apply visible, legible, indelible CE marking. No CE marking, no EU market from 11 Dec 2027.",
+          "article": "Art. 30",
+          "category": "policy_document",
+          "signals": [
+            "docs/ce-marking.md",
+            "README.md",
+            "packaging/ce-mark.svg"
+          ],
+          "tier": "inferrable",
+          "primary_doc": "CRA.md",
+          "inference_criteria": "Verify documentation explaining how the CE marking will be affixed (on product packaging, label, website, or accompanying docs).",
+          "interview_prompt": "Do you have a defined plan for affixing or displaying the CE marking on product packaging or accompanying documentation?"
+        },
+        {
+          "id": "R.9",
+          "title": "Compile the technical file",
+          "description": "Assemble the Annex VII package: description, risk assessment, SDL evidence, test results, SBOM, connection audits, DoC and EOL declaration.",
+          "article": "Art. 31 \u00b7 Annex VII",
+          "category": "policy_document",
+          "signals": [
+            "compliance/technical-file/",
+            "docs/technical-file.md",
+            "compliance/"
+          ],
+          "tier": "inferrable",
+          "primary_doc": "CRA.md",
+          "inference_criteria": "Verify compilation of Annex VII technical documentation file.",
+          "interview_prompt": "Is your Annex VII technical documentation file assembled and ready for potential market surveillance inspection?"
+        },
+        {
+          "id": "R.10",
+          "title": "10-year retention plan",
+          "description": "Archive all technical documentation, including every SBOM version, for at least 10 years from first market placement.",
+          "article": "Art. 31(3)",
+          "category": "policy_document",
+          "signals": [
+            "compliance/retention-policy.md",
+            "docs/retention.md",
+            "CRA.md"
+          ],
+          "tier": "inferrable",
+          "primary_doc": "CRA.md",
+          "inference_criteria": "Verify explicit 10-year retention commitment for the technical file and Declaration of Conformity.",
+          "interview_prompt": "Does your company have a data archive procedure to preserve technical compliance files for 10 years?"
+        },
+        {
+          "id": "R.11",
+          "title": "User-facing documentation",
+          "description": "Communicate intended use, cybersecurity properties, how to configure security, the declared EOL and how to report vulnerabilities.",
+          "article": "Annex II \u00b7 Art. 13(18)",
+          "category": "policy_document",
+          "signals": [
+            "README.md",
+            "docs/",
+            "USER_GUIDE.md"
+          ],
+          "tier": "inferrable",
+          "primary_doc": "README.md",
+          "inference_criteria": "Verify user-facing instructions detailing secure installation, configuration, and update procedures.",
+          "interview_prompt": "Do your user-facing docs (README or manuals) provide clear instructions on secure installation and security updates?"
+        },
+        {
+          "id": "R.12",
+          "title": "Vulnerability disclosure contact published",
+          "description": "Publish a single, actively monitored point of contact for reporting vulnerabilities.",
+          "article": "Art. 13(5)",
+          "category": "policy_document",
+          "signals": [
+            "SECURITY.md",
+            ".github/SECURITY.md"
+          ],
+          "tier": "inferrable",
+          "primary_doc": "SECURITY.md",
+          "inference_criteria": "Verify presence of a single contact point (email address or private vulnerability reporting) for reporting security vulnerabilities.",
+          "interview_prompt": "Do you provide a public security contact email (e.g. security@yourcompany.com) or vulnerability disclosure channel?"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "After release",
+      "title": "After product release",
+      "note": "Ongoing monitoring, the Article 14 reporting timeline and update obligations across the support period.",
+      "items": [
+        {
+          "id": "A.1",
+          "title": "Update risk assessment on significant change",
+          "description": "Reassess when a major product change, significant new threat or exploited vulnerability is identified; document the trigger and outcome.",
+          "article": "Annex I \u00b7 I(1)",
+          "category": "policy_document",
+          "signals": [
+            "docs/risk-assessment.md",
+            "compliance/change-management.md"
+          ],
+          "tier": "inferrable",
+          "primary_doc": "CRA.md",
+          "inference_criteria": "Verify policy triggering cybersecurity risk re-assessment when substantial product modifications occur.",
+          "interview_prompt": "Do you have a policy to re-evaluate product cybersecurity risks whenever major architectural changes are made?"
+        },
+        {
+          "id": "A.2",
+          "title": "Automated SBOM vulnerability monitoring",
+          "description": "Deploy tooling that monitors SBOM components against live feeds (NVD, EUVD, OSV) frequently enough to meet the 24-hour reporting window. Manual monitoring is insufficient.",
+          "article": "Art. 14",
+          "category": "automation",
+          "signals": [
+            ".github/workflows/dependabot.yml",
+            ".github/dependabot.yml",
+            "renovate.json",
+            ".github/workflows/security.yml"
+          ],
+          "tier": "deterministic",
+          "primary_doc": ".github/dependabot.yml",
+          "inference_criteria": "Deterministic check: continuous scheduled vulnerability scanning against live CVE databases (OSV, NVD).",
+          "interview_prompt": "Do you continuously screen your dependency SBOM against active vulnerability feeds on a schedule?"
+        },
+        {
+          "id": "A.3",
+          "title": "24-hour initial vulnerability report",
+          "description": "On becoming aware of an actively exploited vulnerability, file an initial report within 24 hours via ENISA's single reporting platform. Applies from 11 Sep 2026.",
+          "article": "Art. 14(2)",
+          "category": "policy_document",
+          "signals": [
+            "SECURITY.md",
+            "docs/incident-response.md",
+            "compliance/vulnerability-reporting.md"
+          ],
+          "tier": "inferrable",
+          "primary_doc": "SECURITY.md",
+          "inference_criteria": "Verify explicit 24-hour notification protocol for actively exploited vulnerabilities to CSIRTs/ENISA (Art. 14(2)).",
+          "interview_prompt": "Does your incident response plan include notifying national CSIRTs/ENISA within 24 hours of an actively exploited zero-day?"
+        },
+        {
+          "id": "A.4",
+          "title": "72-hour technical report",
+          "description": "Submit a detailed technical report to ENISA and the national CSIRT within 72 hours, including severity and any mitigation.",
+          "article": "Art. 14(3)",
+          "category": "policy_document",
+          "signals": [
+            "SECURITY.md",
+            "docs/incident-response.md",
+            "compliance/vulnerability-reporting.md"
+          ],
+          "tier": "inferrable",
+          "primary_doc": "SECURITY.md",
+          "inference_criteria": "Verify 72-hour technical assessment report protocol (Art. 14(3)).",
+          "interview_prompt": "Does your incident procedure commit to delivering a detailed technical assessment to authorities within 72 hours?"
+        },
+        {
+          "id": "A.5",
+          "title": "Final report within 14 days of remediation",
+          "description": "Submit a final report no later than 14 days after a security update or workaround is made available.",
+          "article": "Art. 14(4)",
+          "category": "policy_document",
+          "signals": [
+            "SECURITY.md",
+            "docs/incident-response.md"
+          ],
+          "tier": "inferrable",
+          "primary_doc": "SECURITY.md",
+          "inference_criteria": "Verify final report delivery within 14 days of remediation patch or 1 month of incident resolution (Art. 14(4)).",
+          "interview_prompt": "Do you have a protocol to submit a final incident/vulnerability closure report once a fix is deployed?"
+        },
+        {
+          "id": "A.6",
+          "title": "Severe incident reporting",
+          "description": "Report severe incidents affecting product security on the same 24/72-hour timeline.",
+          "article": "Art. 14(2)",
+          "category": "policy_document",
+          "signals": [
+            "SECURITY.md",
+            "docs/incident-response.md"
+          ],
+          "tier": "inferrable",
+          "primary_doc": "SECURITY.md",
+          "inference_criteria": "Verify severe cybersecurity incident notification protocol.",
+          "interview_prompt": "Does your security procedure cover rapid reporting of severe security incidents impacting the product availability or user data?"
+        },
+        {
+          "id": "A.7",
+          "title": "Automatic update for third-party vulnerabilities",
+          "description": "Maintain an automatic update system able to patch third-party component vulnerabilities. A fix within 24 hours exempts reporting, not fixing.",
+          "article": "Art. 14(2)(a)",
+          "category": "automation",
+          "signals": [
+            ".github/dependabot.yml",
+            "renovate.json",
+            ".github/workflows/auto-update.yml"
+          ],
+          "tier": "deterministic",
+          "primary_doc": ".github/dependabot.yml",
+          "inference_criteria": "Deterministic check: automated patching workflow for vulnerable third-party components.",
+          "interview_prompt": "Do you use automated pull requests (Dependabot/Renovate) to quickly test and deploy third-party security patches?"
+        },
+        {
+          "id": "A.8",
+          "title": "Security updates free of charge",
+          "description": "Provide all security updates free of charge for the duration of the support period.",
+          "article": "Art. 13(9)",
+          "category": "policy_document",
+          "signals": [
+            "SECURITY.md",
+            "SUPPORT.md",
+            "CRA.md"
+          ],
+          "tier": "inferrable",
+          "primary_doc": "SECURITY.md",
+          "inference_criteria": "Verify formal commitment that all security patches will be provided free of charge throughout the support lifetime.",
+          "interview_prompt": "Do you commit to providing all security patches free of charge to customers throughout the product support period?"
+        },
+        {
+          "id": "A.9",
+          "title": "Advance notice of End-of-Life",
+          "description": "Notify users at least 12 months before the final security update, where feasible.",
+          "article": "Art. 13(8)",
+          "category": "policy_document",
+          "signals": [
+            "SECURITY.md",
+            "SUPPORT.md",
+            "CRA.md"
+          ],
+          "tier": "inferrable",
+          "primary_doc": "SECURITY.md",
+          "inference_criteria": "Verify policy to notify users in advance before product support reaches End-of-Life.",
+          "interview_prompt": "Do you commit to notifying customers well in advance before product security support ends?"
+        },
+        {
+          "id": "A.10",
+          "title": "Corrective measures for non-compliant products",
+          "description": "Remediate, withdraw or recall non-compliant products and notify market surveillance. Inaction is itself a violation.",
+          "article": "Art. 13(14)",
+          "category": "policy_document",
+          "signals": [
+            "compliance/corrective-actions.md",
+            "docs/recalls.md"
+          ],
+          "tier": "inferrable",
+          "primary_doc": "CRA.md",
+          "inference_criteria": "Verify corrective action and potential recall procedure for non-compliant products placed on the EU market.",
+          "interview_prompt": "Do you have a documented process to issue corrective updates or product notices if non-compliance is identified?"
+        }
+      ]
+    }
+  ]
+}

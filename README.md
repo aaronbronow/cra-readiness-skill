@@ -1,186 +1,95 @@
-# CRA Readiness Score
+# EU Cyber Resilience Act (CRA) Readiness Skill
 
-An agent skill that grades a GitHub repository's readiness for the EU Cyber Resilience Act
-(Regulation (EU) 2024/2847) on an A–D scale, written for startup founders who are not
-security specialists.
+> **An agent-agnostic AI skill and headless audit engine for startup founders and builders to answer:**  
+> *"Give me a score based on how ready my GitHub repo is to comply with the Cyber Resilience Act."*
 
-Ask your coding agent:
+Evaluates software repositories against the official **40-item CRA Manufacturer Compliance Matrix** (Regulation EU 2024/2847) using a **3-tier scan control architecture**, outputting a plain-English founder letter grade ($A, B, C, D$) with drop-in remediation templates.
 
-> "Give me a score for how ready my GitHub repo is to comply with the Cyber Resilience Act."
+---
 
-You get a letter grade, a plain-English explanation, the three things to do next, and a
-40-row checklist with the evidence behind every row.
+## 🎯 The Founder Grading System
 
-| Grade | Meaning |
-|-------|---------|
-| **A** | Ready for EU launch, as far as this assessment can see |
-| **B** | Needs automation work (SBOM, scanning, signing, monitoring) |
-| **C** | Needs automation work and policy/document work |
-| **D** | Needs both, and the assessment could not see enough (permissions or missing answers) to be sure of anything more |
+Startup founders need binary clarity: *Can we ship to EU customers without regulatory penalty, or what technical work is blocking us?*
 
-The checklist follows the 40-item manufacturer compliance matrix published at
-[cyberresilienceact.eu](https://www.cyberresilienceact.eu/compliance-matrix.html). Each item is
-graded against **the text of Regulation (EU) 2024/2847** (its "baseline"); industry practices
-that go further (branch protection, SBOM in CI, pentests, Dependabot, ...) are reported in a
-separate "Beyond the letter" section with their source and never affect the grade. Where the
-matrix states more than the regulation does, `references/cra-background.md` lists the difference.
+| Grade | Status | What It Means for a Founder | Fast Remediation |
+| :---: | :--- | :--- | :--- |
+| **🟢 A** | **Ready for EU Launch** | Both automated CI/CD guardrails and manufacturer governance/policies are established ($\ge 75\%$ each). | Maintain technical documentation for 10 years. |
+| **🟡 B** | **Need Automation Work** | Policies and legal declarations exist (`SECURITY.md`, `CRA.md`, EOL), but automated CI/CD checks (SBOM generation, automated CVE screening) are missing. | Add `.github/workflows/cra-ci.yml` to generate CycloneDX SBOMs & scan dependencies. |
+| **🟠 C** | **Need Automation & Policy Work** | Typical early-stage state: missing both automated CI/CD checks and statutory compliance declarations. | 1. Drop in `templates/SECURITY.md` & `templates/CRA.md`<br>2. Enable CI SBOM workflow. |
+| **🔴 D** | **Incomplete Assessment / Unassessed** | Repository path could not be accessed, tool permissions were denied, or the folder is completely empty. | Grant repository read access or run conversational interview mode. |
 
-## What it is not
+---
 
-- Not legal advice, and not a compliance certification. A repository cannot be compliant;
-  a company is. The report always says which items a repo cannot show.
-- Not a classifier. It flags features that may make a product "Important" or "Critical"
-  under CRA Annex III/IV, but the decision is yours (or your advisor's).
-- Not a scanner. Repository evidence is read, not executed.
+## 🏗️ The 3-Tier Scan Control Architecture
 
-## Install
+To ensure deterministic reliability in headless CI while providing deep contextual analysis in conversational agents, this skill partitions the 40 obligations across three distinct tiers:
 
-The skill is a directory in the [Agent Skills](https://agentskills.io) format: a `SKILL.md`
-with supporting files. It works in any agent that reads that format.
+1. **Tier 1: Deterministic Tool Engine (Headless / Zero-LLM)**:
+   - Evaluates concrete files, workflows, lockfiles, and container configurations.
+   - If a GitHub API token is present, verifies branch protection and secret scanning; if missing, degrades gracefully without failing.
+   - Outputs clear statuses: `PASS`, `FAIL`, `NEEDS_EXPLANATION` (for candidate documents), and `NEEDS_USER_INPUT` (for organizational attestations).
+2. **Tier 2: Agent Semantic Explanation (`NEEDS_EXPLANATION`)**:
+   - For candidate documents (`SECURITY.md`, `CRA.md`, `docs/`), an AI agent reads the text and checks semantic adherence to statutory CRA requirements (e.g. 24h CSIRT notification, 5-year free updates, Module A self-assessment).
+3. **Tier 3: Guided Founder Questionnaire (`NEEDS_USER_INPUT`)**:
+   - For organizational items that cannot be proven by code alone (e.g. EU Authorised Representative, internal SDL conformity), the agent asks a short, targeted plain-English questionnaire.
 
-| Agent | Where to put the directory |
-|-------|----------------------------|
-| Claude Code | `~/.claude/skills/cra-readiness-score/` (global) or `.claude/skills/cra-readiness-score/` (project) |
-| OpenCode | `~/.config/opencode/skills/cra-readiness-score/` (global) or `.opencode/skills/cra-readiness-score/` (project) |
-| Codex CLI | `~/.codex/skills/cra-readiness-score/` |
-| Cursor | `.cursor/skills/cra-readiness-score/` |
-| Other | Wherever the agent discovers `SKILL.md` files |
+---
 
-```sh
-git clone <this repo> cra-readiness-score
-cp -r cra-readiness-score ~/.claude/skills/        # or the path for your agent
+## ⚡ How to Use
+
+### 1. Reusable GitHub Action (Headless CI/CD)
+Add the audit directly to your repository's workflow (`.github/workflows/cra-audit.yml`):
+
+```yaml
+name: CRA Readiness Audit
+on: [push, pull_request]
+
+jobs:
+  cra-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aaronbronow/cra-readiness-skill@v1
+        with:
+          format: 'markdown'
+          fail-on-grade: 'D'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
+*Outputs a formatted audit scorecard directly into your GitHub Action Step Summary.*
+
+### 2. Standalone Terminal CLI (Zero Dependencies)
+Run offline on any local directory with stock Python 3.8+:
+
+```bash
+# Markdown report (default)
+python3 scripts/collector.py /path/to/repo
+
+# Machine-readable JSON for CI/CD gates or dashboards
+python3 scripts/collector.py /path/to/repo --format json
+
+# Summary headline
+python3 scripts/collector.py /path/to/repo --format summary
 ```
 
-## Security properties and secure configuration
+### 3. With Any AI Agent (Claude Code, Antigravity, Cursor, Copilot)
+This repository follows the open [Agent Skill specification](https://agentskills.io) (`SKILL.md`):
+- **Claude Code / Cursor**: Point to or install this skill directory and prompt:
+  > *"Audit this repository for CRA readiness using the instructions in SKILL.md"*
+- **Zero-Tool Sandbox (Desktop chat / Web sandbox)**: The agent conducts a rapid 4-part interview using [`references/interview_guide.md`](references/interview_guide.md) without requiring filesystem access.
 
-What the collector does and does not do:
+---
 
-- **Network:** contacts only `api.github.com` and `github.com`. No telemetry, no third-party
-  services, no uploads. Run with `--no-api` for a fully offline scan of a local checkout.
-- **Data:** reads files in the repository and public/authorised GitHub settings; writes only
-  the JSON output you ask for (`--out`) or stdout. Temporary clones are deleted unless
-  `--keep-clone` is given.
-- **Secrets:** the GitHub token is passed as an HTTP header, never placed in a URL or written
-  to output. Default-credential findings report the *variable name and line*, not the value.
-- **Authentication:** none of its own. It has no accounts, stores nothing, and listens on no ports.
+## 🛠️ One-Click Remediation Templates
 
-Secure configuration recommendations:
+Move from **Grade C $\rightarrow$ B $\rightarrow$ A** in minutes using the pre-built templates in `templates/`:
 
-- Use a **fine-grained personal access token** scoped to the single repository with
-  read-only `Contents`, `Metadata` and `Administration` permissions. `Administration: read`
-  is what allows branch protection and Dependabot alert settings to be read; without it those
-  items are reported as "could not check", never guessed.
-- Prefer `GITHUB_TOKEN`/`GH_TOKEN` environment variables or `gh auth` over `--token`, so the
-  token does not land in shell history.
-- Pin the release you install (`vX.Y.Z`) and verify it as described below.
+1. **[`templates/CRA.md`](templates/CRA.md)**: Drop into repo root to provide the Annex VII technical file, product classification, 5-year EOL commitment, and Module A Declaration of Conformity.
+2. **[`templates/SECURITY.md`](templates/SECURITY.md)**: Drop into repo root to document your vulnerability disclosure contact and Article 14 24h/72h reporting protocols.
+3. **[`templates/github-actions/cra-ci-sbom.yml`](templates/github-actions/cra-ci-sbom.yml)**: Drop into `.github/workflows/cra-ci.yml` for automated CycloneDX SBOM generation, Trivy CVE screening, and artifact archiving.
 
-To report a vulnerability, see [`SECURITY.md`](SECURITY.md).
+---
 
-## Verifying a release
+## 📋 License
 
-Every tagged release ships with a SPDX SBOM, a `SHA256SUMS.txt`, and a Sigstore build-provenance
-attestation generated by the `Release` workflow. To verify a download is genuine and unmodified:
-
-```sh
-# 1. checksum
-sha256sum -c SHA256SUMS.txt --ignore-missing
-
-# 2. provenance (proves the file was built by this repo's release workflow)
-gh attestation verify cra-readiness-skill-v0.1.0.tar.gz --repo aaronbronow/cra-readiness-skill
-```
-
-Attestations are also listed at https://github.com/aaronbronow/cra-readiness-skill/attestations.
-
-## How an assessment runs
-
-1. **Intake** – the agent asks where the code is and how you want evidence gathered, then a
-   short set of scope and document questions. "Don't know" and "skip" are valid answers.
-2. **Evidence** – one of:
-   - the optional collector script (below), which reads the repo and a few GitHub settings;
-   - the agent inspecting files directly with its own tools;
-   - you pasting a few files when you have no tool access to grant.
-3. **Statuses** – each of the 40 items becomes Met / Partial / Not met / Could not check / N/A
-   according to fixed rules in `references/checklist.md`.
-4. **Grade** – computed mechanically from `references/scoring.md`.
-5. **Report** – fixed layout from `references/report-template.md`.
-
-## The collector script (optional)
-
-`scripts/collect.py` gathers repository evidence into JSON so the grade rests on facts rather
-than the agent's impression. You do not have to use it; without it the agent inspects files
-itself and more items end up as "could not check".
-
-- Python 3.8+, standard library only. Nothing to install.
-- Contacts only `api.github.com` and `github.com` (for a shallow clone). Uploads nothing.
-- Uses a GitHub token if one is available (`--token`, `GITHUB_TOKEN`, `GH_TOKEN`, or the
-  `gh` CLI). Without one it still works on public repositories; admin-only settings
-  (branch protection, Dependabot alerts) are reported as not readable rather than guessed.
-
-```sh
-python3 scripts/collect.py --repo OWNER/NAME --summary
-python3 scripts/collect.py --path /path/to/checkout --summary     # no network at all
-python3 scripts/collect.py --repo OWNER/NAME --out evidence.json
-python3 scripts/collect.py --path . --exclude examples --exclude docs/templates   # skip sample docs
-```
-
-Output sections:
-
-- `access` – what worked: token source, clone status, and every API call with its result
-  (`ok`, `permission_denied`, `not_found`, `rate_limited`, ...).
-- `signals` – raw findings: key files, workflows and the tools they use, release assets,
-  document categories detected, SECURITY.md analysis, default-credential hits, etc.
-- `checks` – preliminary baseline status for each of the 40 items with the evidence to cite and
-  a hint where intake answers are needed, plus a `practices` list (name, source, adopted).
-  Items that only a founder can answer are `UNKNOWN` with `intake_only`.
-- `--exclude DIR|FILE` skips directories or files that hold documents *about* compliance
-  (templates, examples, fixtures). `docs/compliance/reports/` is always skipped; save assessment
-  reports there.
-
-## Repository layout
-
-```
-SKILL.md                      entry point for the agent
-SECURITY.md                   how to report a vulnerability; support period
-.github/workflows/            CI, CodeQL, secret scan, EOL check, scheduled vuln scan, release
-references/
-  cra-background.md           dates, scope, roles, one-paragraph summaries of the annexes
-  checklist.md                the 40 items: track, gate, evidence, status rules, fixes
-  scoring.md                  A/B/C/D rules, confidence label, worked examples
-  intake.md                   founder questionnaire and answer-to-status mapping
-  report-template.md          fixed report layout and writing rules
-  glossary.md                 one-line definitions used in reports
-scripts/
-  collect.py                  optional evidence collector
-examples/
-  sample-report.md            what a finished report looks like
-```
-
-## Design notes
-
-- **Two layers.** Every item has a *CRA baseline* (scored; the letter of the law with article
-  references) and *Beyond the letter* (reported; practices tagged `[Scorecard]`, `[OSPS]`,
-  `[SSDF]`, `[SLSA]`, `[ETSI]`, `[GitHub]`, `[Matrix]`). A documented manual process that
-  satisfies the law is Met; missing tooling is a practice gap, not a legal one.
-- **Two tracks.** Every item's baseline fix is either *Automation & tooling* (7 items) or
-  *Policy, design & documents* (33 items). The split drives the B/C distinction.
-- **Gate items.** 19 items must be Met for an A. Only literal obligations are gates.
-- **Unknown is honest.** Missing permissions or skipped questions produce "could not check",
-  never "not met". Ten or more unknowns produce a D with a list of exactly what would fix it.
-- **Attestations are labelled.** A founder's "yes, we have that" counts, but the report marks
-  it "based on your answer, not verified".
-
-## Status
-
-Rubric 2026.09.1. Built for manufacturer-level obligations only (not open-source stewards,
-importers or distributors). Cross-agent testing and rubric calibration against real repos are
-the next steps and have not been done yet.
-
-## License
-
-MIT. See `LICENSE`.
-
-## Sources
-
-- Regulation (EU) 2024/2847: https://eur-lex.europa.eu/eli/reg/2024/2847/oj
-- 40-item compliance matrix: https://www.cyberresilienceact.eu/compliance-matrix.html
-- OpenSSF OSPS Baseline (related control mapping): https://baseline.openssf.org/
+MIT License. Copyright (c) 2026 Aaron Bronow.

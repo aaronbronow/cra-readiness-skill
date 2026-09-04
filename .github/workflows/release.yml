@@ -31,7 +31,7 @@ jobs:
           set -euo pipefail
           name="cra-readiness-skill-${TAG}"
           mkdir -p "dist/${name}"
-          cp -r SKILL.md README.md LICENSE SECURITY.md references scripts "dist/${name}/"
+          cp -r SKILL.md README.md TESTING.md LICENSE SECURITY.md action.yml references scripts templates "dist/${name}/"
           tar -C dist -czf "dist/${name}.tar.gz" "${name}"
           rm -rf "dist/${name}"
           ls -la dist
