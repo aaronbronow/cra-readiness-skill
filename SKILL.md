@@ -1,171 +1,115 @@
 ---
-name: cra-readiness-score
-description: Grade a GitHub repository's readiness for the EU Cyber Resilience Act (CRA) on an A/B/C/D scale, written for startup founders and other non-technical users. Use when someone asks how ready their repo, product or company is for the CRA, for a CRA score/grade/checklist, about CE marking or SBOM requirements for software sold in the EU, or about the 11 Sep 2026 / 11 Dec 2027 CRA deadlines.
+name: cra-readiness-skill
+description: Evaluates software repositories against the 40-item EU Cyber Resilience Act (CRA) Manufacturer Compliance Matrix (Regulation EU 2024/2847). Designed for startup founders and engineering leads. Provides a 3-tier scan control architecture (deterministic tool, semantic agent explanation, and guided founder interview) with drop-in remediation templates. Supports headless CI/CD, Claude Code, and zero-tool sandboxes.
 ---
 
-# CRA Readiness Score
+# Cyber Resilience Act (CRA) Readiness Skill
 
-You are helping a startup founder find out how ready their product is for the EU Cyber
-Resilience Act, using a fixed 40-item manufacturer checklist and a mechanical A/B/C/D grade.
-The founder may not be technical. Explain everything in plain language and never assume they
-know what an SBOM, a Notified Body or branch protection is.
+## 1. Overview & Purpose
+This skill audits software repositories for compliance with the **EU Cyber Resilience Act (Regulation EU 2024/2847)** from the perspective of **commercial software manufacturers and startup founders**.
 
-## Files in this skill
+It translates the official **40-item CRA Manufacturer Matrix** into a transparent, actionable founder grade:
 
-| File | When to read it |
-|------|-----------------|
-| `references/cra-background.md` | Once per session, before the first assessment |
-| `references/intake.md` | When asking the founder questions (Step 2) |
-| `references/checklist.md` | When assigning statuses (Step 4); it defines evidence and MET/PARTIAL/NOT_MET rules for all 40 items |
-| `references/scoring.md` | When computing the grade (Step 5) |
-| `references/report-template.md` | When writing the report (Step 6) |
-| `references/glossary.md` | When a term needs a one-line definition |
-| `scripts/collect.py` | Optional evidence collector (Step 3, option 1) |
+| Grade | Meaning for Founders | Requirements to Achieve |
+| :---: | :--- | :--- |
+| **🟢 A** | **Ready for EU Launch** | Both automated CI/CD guardrails and manufacturer governance/policies are established ($\ge 75\%$ each). |
+| **🟡 B** | **Need Automation Work** | Policies and legal declarations exist (`SECURITY.md`, `CRA.md`, EOL), but automated CI/CD checks (SBOM generation, CVE screening) are missing. |
+| **🟠 C** | **Need Automation & Policy Work** | Typical early-stage baseline: missing both automated CI/CD checks and statutory compliance declarations. |
+| **🔴 D** | **Incomplete Assessment / Unassessed** | Repository directory could not be accessed, permission was denied, or the folder is completely empty. |
 
-Read reference files only when the step needs them. Do not paste their contents to the user.
+---
 
-## Principles
+## 2. The 3-Tier Scan Control Architecture
 
-1. **The grade is mechanical and measures the letter of the law only.** Every item in
-   `checklist.md` has two layers: a *CRA baseline* (what Regulation (EU) 2024/2847 literally
-   requires, with article references) and *Beyond the letter* (industry practices such as branch
-   protection, SBOM-in-CI or a pentest, each tagged with its source). Statuses and the A/B/C/D
-   grade come **only** from the baseline. Practices are reported in their own section and never
-   move the grade. Never present a practice as a legal requirement. Never adjust a grade by feel.
-2. **Evidence or nothing.** Every "Met" from the repo names a file, workflow, release or setting.
-   Every "Met" from the founder is labelled "based on your answer, not verified".
-3. **Unknown is honest.** If you cannot see something, it is "Could not check", not "Not met".
-4. **Tool access is optional.** Never require the founder to grant permissions, install anything
-   or run a script. Offer it, explain the trade-off, respect the answer.
-5. **Not legal advice.** A repository cannot be "compliant"; a company is. Say so in every report.
-6. **Founders read the first five lines.** Grade, reason, next three actions.
+To ensure deterministic reliability in headless CI while providing deep contextual analysis in conversational agents, this skill operates across three distinct tiers:
 
-## Workflow
-
-### Step 1 · Orient
-
-If this is the first assessment in the session, read `references/cra-background.md`.
-
-### Step 2 · Intake
-
-Read `references/intake.md`. Ask Batch 0 (where the code is, how to gather evidence). Then
-Batch 1 (scope). Then Batch 2 (documents). One batch per message; short questions; tell the
-founder "don't know" and "skip" are fine.
-
-If the founder says "just look at the repo", ask Batch 0 only and proceed. Explain in one
-sentence that intake-only items (classification, conformity route, CE marking, etc.) will show
-as "could not check" and may pull the grade to D.
-
-Record every answer against the item IDs listed in `intake.md`.
-
-### Step 3 · Collect repository evidence
-
-Use whichever option the founder chose in Batch 0. Work down this ladder if an option fails,
-telling the founder what you are doing and why.
-
-**Option 1 – Collector script (most reliable).**
-Run `scripts/collect.py` with the capabilities available to you. It needs only Python 3.8+.
-
-```
-python3 scripts/collect.py --repo OWNER/NAME            # GitHub API + shallow clone
-python3 scripts/collect.py --path /path/to/checkout     # local files only, no network
-python3 scripts/collect.py --repo OWNER/NAME --path .   # both
-python3 scripts/collect.py --path . --summary           # add a human-readable summary
-python3 scripts/collect.py --path . --exclude docs/templates   # skip dirs holding sample/vendored docs
+```mermaid
+graph TD
+    Trigger([Execution Environment]) --> BranchEnv{Environment Type}
+    
+    BranchEnv -->|GitHub Action / Headless CLI| Tier1[Tier 1: Deterministic Tool Engine]
+    BranchEnv -->|Claude Code / Agent with Tools| Tier1_Agent[Tier 1: Deterministic Tool Engine]
+    BranchEnv -->|Zero-Tool Agent / Web Chat| Tier3_Direct[Tier 3: Guided Founder Interview]
+    
+    Tier1 --> OutputCI[CI Step Summary / SARIF / PR Notice / JSON]
+    
+    Tier1_Agent --> CheckExp{Any items marked NEEDS_EXPLANATION?}
+    CheckExp -->|Yes| Tier2[Tier 2: Agent Semantic Inspection]
+    CheckExp -->|No| CheckInput{Any items marked NEEDS_USER_INPUT?}
+    
+    Tier2 --> CheckInput
+    CheckInput -->|Yes| Tier3[Tier 3: Adaptive Founder Questionnaire]
+    CheckInput -->|No| FinalReport[Unified Founder Scorecard + Remediation]
+    Tier3 --> FinalReport
+    Tier3_Direct --> FinalReport
 ```
 
-Use `--exclude` when a directory contains documents *about* compliance that are not the
-product's own (templates, examples, fixtures, vendored docs); otherwise they inflate policy items.
+---
 
-- It reads `GITHUB_TOKEN` or `GH_TOKEN` from the environment, or asks the `gh` CLI for a token
-  if installed. Without a token it still works for public repositories, but repository
-  *settings* (branch protection, Dependabot alerts, private vulnerability reporting) will
-  report `permission_denied` or `no_token`.
-- It only contacts `api.github.com` and `github.com`. It writes nothing outside the output file.
-- Output is JSON (`--out FILE`, default stdout). Use the `checks` section as your starting
-  statuses and the `signals` section as evidence to cite. Any check the script marks `UNKNOWN`
-  stays `UNKNOWN` unless you find evidence another way.
+## 3. Agent Execution Instructions
 
-Before running it, tell the founder in one sentence what it does and that nothing is uploaded.
+When an agent is asked: *"Evaluate my repository for CRA compliance"* or *"Is my codebase ready for the EU Cyber Resilience Act?"*, execute the following protocol:
 
-**Option 2 – Inspect directly.**
-If you can read files in the working directory, or fetch public GitHub URLs, look for the
-evidence listed per item in `checklist.md`. Minimum set to look at:
+### Step 1: Run Deterministic Engine (Tier 1)
+If the host agent has terminal/tool execution access:
+```bash
+python3 scripts/collector.py . --format json
+```
+Parse the resulting JSON. It categorizes every item into:
+- `PASS`: Verified deterministically (workflows, SBOM, lockfiles, Dockerfiles).
+- `FAIL`: Required technical pipeline or document absent.
+- `NEEDS_EXPLANATION`: Candidate file exists, but requires semantic verification of specific text clauses.
+- `NEEDS_USER_INPUT`: Human organizational attestation required.
 
-- `SECURITY.md`, `SUPPORT.md`, `README.md`, `CONTRIBUTING.md`, `CHANGELOG.md`, `LICENSE`
-- `docs/` (especially anything named security, compliance, risk, threat, sdl, incident, support,
-  lifecycle, eol, sbom, network, privacy)
-- `.github/workflows/*.yml`, `.github/dependabot.yml`, `renovate.json`, `.github/PULL_REQUEST_TEMPLATE.md`
-- lockfiles, `Dockerfile*`, `docker-compose*.yml`, `.env.example`, runtime pin files
-- release assets on the latest release (SBOM files, signatures, checksums, attestations)
-- Repository settings you can see (security policy present, private vulnerability reporting,
-  Dependabot). If you cannot read a setting, it is `UNKNOWN`, with the reason "needs repository
-  admin access".
+### Step 2: Semantic Explanation Pass (Tier 2)
+For any items flagged as **`NEEDS_EXPLANATION`**:
+1. Open the identified `primary_doc` (e.g. `SECURITY.md`, `CRA.md`) using `view_file`.
+2. Inspect the content against the `inference_criteria` in [`references/cra_matrix_40.json`](references/cra_matrix_40.json):
+   - **R.12 (CVD Contact)**: Verify that a security contact email or private vulnerability reporting link is stated.
+   - **A.3–A.6 (Article 14 SLAs)**: Check whether 24-hour early warning, 72-hour assessment, and remediation reporting are specified.
+   - **R.5 & A.8 (EOL Support)**: Verify that free security updates are guaranteed for at least 5 years.
+   - **B.1, B.2, R.7 (Conformity)**: Verify that product classification and Module A Declaration of Conformity are declared.
+3. If the criteria are met, upgrade the item status to **`PASS`**.
 
-**Option 3 – No tool access.**
-Ask the founder to paste, in order: `SECURITY.md`, the list of files under `.github/workflows/`
-and `docs/`, one release page, and `SUPPORT.md` or the "supported versions" section. Ask for
-no more than two things per message. Everything you do not receive is `UNKNOWN`.
+### Step 3: Adaptive Founder Interview Pass (Tier 3)
+For items flagged as **`NEEDS_USER_INPUT`**:
+1. Present the targeted, plain-English questions from [`references/interview_guide.md`](references/interview_guide.md):
+   - **F.4**: *"Is your company legally established inside the European Union? If outside the EU, have you appointed an EU Authorised Representative?"*
+   - **F.2**: *"Does your team follow a repeatable security process when building features and keep internal records?"*
+   - **D.2**: *"Do you enforce peer review and required CI checks before merging into main?"*
+2. Record the founder's response:
+   - "Yes" $\rightarrow$ `PASS` (record as verified founder attestation).
+   - "No / Unsure" $\rightarrow$ `FAIL` (provide drop-in template).
 
-### Step 4 · Assign statuses
+### Step 4: Drop-in Remediation Delivery
+For any failing items, provide the immediate one-click solution from `templates/`:
+- **For Missing Governance (C $\rightarrow$ B)**:
+  - Copy [`templates/CRA.md`](templates/CRA.md) to repository root (Annex VII technical file & Module A DoC).
+  - Copy [`templates/SECURITY.md`](templates/SECURITY.md) to repository root (CVD contact & Art. 14 24h notification).
+- **For Missing CI Automation (B $\rightarrow$ A)**:
+  - Copy [`templates/github-actions/cra-ci-sbom.yml`](templates/github-actions/cra-ci-sbom.yml) to `.github/workflows/cra-ci.yml`.
 
-Read `references/checklist.md`. For each of the 40 items, apply its **Baseline** status rules to
-the evidence and intake answers. Produce an internal table: `ID | status | source | evidence`.
-Separately, record for each listed practice whether it is adopted, not adopted, or not assessable.
+---
 
-- Repo evidence beats intake answers when they conflict; note the conflict.
-- A documented manual process that satisfies the baseline is MET. Missing tooling is a practice
-  gap, not a baseline gap.
-- Do not infer beyond the rules.
-- `NA` needs a recorded reason (e.g. "library; no listening ports"). F4 is NA by default.
-- If the collector was used, its `checks[].status` is the baseline and `checks[].practices` is
-  the practice layer; both are starting points, refined by intake.
+## 4. Zero-Tool Sandbox Mode (Claude Code Desktop / Copilot Chat)
 
-### Step 5 · Compute the grade
+If tool execution is disabled or unavailable:
+1. Conduct the **4-minute founder questionnaire** from [`references/interview_guide.md`](references/interview_guide.md).
+2. Invite the user to share their `SECURITY.md` or CI workflow snippets.
+3. Deliver the Founder Scorecard and point the user to copy the templates.
 
-Read `references/scoring.md`. Compute counts, `auto_gap`, `policy_gap`, `gate_fail`,
-`unknown_count`; apply the rules in order; assign the confidence label. Write down which rule
-fired; you will cite it under Notes if the result could surprise the founder.
+---
 
-### Step 6 · Write the report
+## 5. Headless GitHub Action Mode
 
-Read `references/report-template.md` and follow it exactly: headline grade with fixed wording,
-plain-English summary, at-a-glance counts, exactly three next actions (baseline only), a
-"Beyond the letter" section with the practice count and up to three suggestions with source
-tags, deadlines, the full 40-row table, what could not be checked, what a repo cannot show,
-notes, disclaimer.
-
-Use the glossary wording the first time a term appears. Cite file paths and setting names
-from the evidence. No percentages, no praise, no invented evidence.
-
-### Step 7 · Offer follow-ups
-
-After the report, offer at most three of:
-- Draft any missing document (SECURITY.md, support policy, incident response procedure, SDL
-  outline, risk assessment table) as a starting point in the repo.
-- Draft a CI workflow for SBOM generation and scanning, or for signing releases.
-- Re-run the assessment after changes, or with an admin token to clear "could not check" items.
-- Explain any item in more depth, including exactly where a "beyond the letter" practice comes
-  from and which baseline item it supports.
-
-Only create or modify files if the founder asks. If asked to save the report, put it under
-`docs/compliance/reports/<YYYY-MM-DD>-cra-readiness.md`; the collector skips that directory by
-default so reports are never mistaken for the product's own policy documents.
-
-## Guardrails
-
-- Do not tell a founder they are "compliant". The strongest claim is "ready for EU launch as far
-  as this assessment can see".
-- Do not tell a founder that a practice (branch protection, required reviews, pentest, SBOM in
-  CI, Dependabot, 12-month EOL notice, EU representative) is required by the CRA. None of them
-  are. Say "recommended" and cite the source tag from `checklist.md`.
-- Where the source matrix at cyberresilienceact.eu states more than the regulation does,
-  `checklist.md` and `cra-background.md` say so; follow the regulation.
-- Do not decide product classification (Default/Important/Critical). Flag indicators, recommend
-  they confirm with an advisor or the classification tool on the source site.
-- Do not run the collector or fetch anything until the founder has chosen an evidence option.
-- Do not send repository contents anywhere other than to the founder in the report.
-- If the repository is private and you have no access, say so immediately rather than
-  attempting workarounds.
-- If the product is clearly out of scope (non-commercial OSS, pure SaaS), say so before grading,
-  then grade anyway if the founder wants the exercise.
+Add the audit to your continuous integration pipeline:
+```yaml
+- name: Run CRA Readiness Audit
+  uses: aaronbronow/cra-readiness-skill@v1
+  with:
+    format: 'markdown'
+    fail-on-grade: 'D'
+  env:
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
+The action will write a full Markdown scorecard directly to `$GITHUB_STEP_SUMMARY` and annotate any missing technical requirements on Pull Requests.

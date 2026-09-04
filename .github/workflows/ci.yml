@@ -26,37 +26,38 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
 
-      - name: Byte-compile the collector
-        run: python -m py_compile scripts/collect.py
-
-      - name: Collector runs offline against this checkout
+      - name: Byte-compile collectors
         run: |
-          python scripts/collect.py --path . --no-api --out evidence.json
+          python -m py_compile scripts/collect.py
+          python -m py_compile scripts/collector.py
+
+      - name: Deterministic 3-tier collector runs offline
+        run: |
+          python scripts/collector.py . --format json > /tmp/out.json
           python - <<'PY'
           import json
-          d = json.load(open("evidence.json"))
-          assert len(d["checks"]) == 40, "expected 40 checklist items"
-          assert d["access"]["local_files"] is True
-          ids = [c["id"] for c in d["checks"]]
-          assert ids[0] == "F1" and ids[-1] == "P10", ids
-          print("collector OK:", d["counts"])
+          d = json.load(open("/tmp/out.json"))
+          assert d["total_items"] == 40
+          assert d["assessed_items"] == 40
+          assert "needs_explanation_count" in d
+          assert "needs_user_input_count" in d
+          print("3-tier collector OK! Grade:", d["grade"])
           PY
 
-      - name: Reference files are complete
+      - name: Run automated test suite
+        run: python -m unittest discover tests
+
+      - name: Reference files, templates, and action.yml are complete
         run: |
           set -e
-          for f in SKILL.md references/checklist.md references/scoring.md references/intake.md \
-                   references/report-template.md references/glossary.md references/cra-background.md; do
+          for f in SKILL.md action.yml references/cra_matrix_40.json references/interview_guide.md \
+                   templates/CRA.md templates/SECURITY.md templates/github-actions/cra-ci-sbom.yml \
+                   templates/github-actions/cra-audit.yml; do
             test -s "$f" || { echo "missing $f"; exit 1; }
           done
           # SKILL.md frontmatter must declare a name and description
           head -5 SKILL.md | grep -q '^name: ' && head -5 SKILL.md | grep -q '^description: '
-          # all 40 item IDs must be present in the checklist
-          for id in F1 F2 F3 F4 B1 B2 B3 B4 B5 B6 B7 B8 B9 D1 D2 D3 D4 D5 \
-                    R1 R2 R3 R4 R5 R6 R7 R8 R9 R10 R11 R12 P1 P2 P3 P4 P5 P6 P7 P8 P9 P10; do
-            grep -q "^### $id " references/checklist.md || { echo "checklist missing $id"; exit 1; }
-          done
-          echo "references OK"
+          echo "references and templates OK"
 
   secrets:
     name: secrets

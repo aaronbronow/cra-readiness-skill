@@ -1,0 +1,65 @@
+name: 'EU Cyber Resilience Act (CRA) Readiness Audit'
+description: 'Deterministic, zero-dependency audit evaluating repositories against the 40-item CRA Manufacturer Compliance Matrix (Regulation EU 2024/2847).'
+author: 'Aaron Bronow'
+branding:
+  icon: 'shield'
+  color: 'blue'
+
+inputs:
+  repo-path:
+    description: 'Path to target repository directory'
+    required: false
+    default: '.'
+  format:
+    description: 'Output format (markdown, json, summary, text)'
+    required: false
+    default: 'markdown'
+  fail-on-grade:
+    description: 'Fail CI if grade reaches or falls below this grade (e.g. D or C)'
+    required: false
+    default: ''
+  output-file:
+    description: 'Path to write audit output file'
+    required: false
+    default: ''
+
+outputs:
+  grade:
+    description: 'Assigned founder grade (A, B, C, D)'
+    value: ${{ steps.audit.outputs.grade }}
+  passed-items:
+    description: 'Count of passing checklist items'
+    value: ${{ steps.audit.outputs.passed_items }}
+  automation-met:
+    description: 'Count of passing automation items'
+    value: ${{ steps.audit.outputs.automation_met }}
+  policy-met:
+    description: 'Count of passing policy items'
+    value: ${{ steps.audit.outputs.policy_met }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Execute CRA Readiness Engine
+      id: audit
+      shell: bash
+      env:
+        ACTION_PATH: ${{ github.action_path }}
+        TARGET_REPO: ${{ inputs.repo-path }}
+        OUTPUT_FORMAT: ${{ inputs.format }}
+        OUTPUT_FILE: ${{ inputs.output-file }}
+        FAIL_ON: ${{ inputs.fail-on-grade }}
+      run: |
+        set -euo pipefail
+        
+        # Execute collector with GitHub Action output formatting
+        python3 "${ACTION_PATH}/scripts/collector.py" "${TARGET_REPO}" \
+          --matrix "${ACTION_PATH}/references/cra_matrix_40.json" \
+          --format "${OUTPUT_FORMAT}" \
+          --github-action \
+          ${OUTPUT_FILE:+--output "$OUTPUT_FILE"}

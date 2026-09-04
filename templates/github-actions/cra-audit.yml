@@ -1,0 +1,30 @@
+name: CRA Compliance Audit
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 6 * * 1' # Weekly Monday scan
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  cra-readiness-audit:
+    name: CRA Readiness Assessment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Run CRA Readiness Audit
+        uses: aaronbronow/cra-readiness-skill@v1
+        with:
+          format: 'markdown'
+          fail-on-grade: 'D'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
