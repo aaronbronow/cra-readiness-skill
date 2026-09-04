@@ -1,171 +1,165 @@
 ---
-name: cra-readiness-score
-description: Grade a GitHub repository's readiness for the EU Cyber Resilience Act (CRA) on an A/B/C/D scale, written for startup founders and other non-technical users. Use when someone asks how ready their repo, product or company is for the CRA, for a CRA score/grade/checklist, about CE marking or SBOM requirements for software sold in the EU, or about the 11 Sep 2026 / 11 Dec 2027 CRA deadlines.
+name: cra-readiness-skill
+description: Evaluates a GitHub repository against the 40-item EU Cyber Resilience Act (CRA) Manufacturer Compliance Matrix. Specifically designed for startup founders, providing an accessible A/B/C/D readiness grade with concrete remediation templates. Supports both automated scanning and zero-tool conversational modes.
 ---
 
-# CRA Readiness Score
+# Cyber Resilience Act (CRA) Readiness Skill
 
-You are helping a startup founder find out how ready their product is for the EU Cyber
-Resilience Act, using a fixed 40-item manufacturer checklist and a mechanical A/B/C/D grade.
-The founder may not be technical. Explain everything in plain language and never assume they
-know what an SBOM, a Notified Body or branch protection is.
+## 1. Overview & Purpose
+This skill audits software repositories for compliance with the **EU Cyber Resilience Act (Regulation EU 2024/2847)** from the perspective of **commercial manufacturers and startup founders**.
 
-## Files in this skill
+It translates the official **40-item CRA Manufacturer Compliance Matrix** across all five product lifecycle stages into a clear, actionable letter grade:
 
-| File | When to read it |
-|------|-----------------|
-| `references/cra-background.md` | Once per session, before the first assessment |
-| `references/intake.md` | When asking the founder questions (Step 2) |
-| `references/checklist.md` | When assigning statuses (Step 4); it defines evidence and MET/PARTIAL/NOT_MET rules for all 40 items |
-| `references/scoring.md` | When computing the grade (Step 5) |
-| `references/report-template.md` | When writing the report (Step 6) |
-| `references/glossary.md` | When a term needs a one-line definition |
-| `scripts/collect.py` | Optional evidence collector (Step 3, option 1) |
+| Grade | Status | What It Means for a Startup Founder |
+| :---: | :--- | :--- |
+| **A** | **Ready for EU Launch** | Both automated CI/CD security controls and required manufacturer policies/documentation are in place. |
+| **B** | **Need Automation Work** | Policies and governance exist (`SECURITY.md`, EOL declarations, DoC), but automated CI/CD checks (SBOM generation, automated CVE screening) are missing. |
+| **C** | **Need Automation Work & Policy/Document Work** | Common early-stage baseline: missing both CI/CD compliance automation and essential regulatory declarations. |
+| **D** | **Incomplete Assessment & Gaps** | Needs both B and C, **and** this skill could not reliably complete the evaluation due to missing tool permissions, lack of repository access, or insufficient product details. |
 
-Read reference files only when the step needs them. Do not paste their contents to the user.
+---
 
-## Principles
+## 2. Operating Modes (Agent-Agnostic)
 
-1. **The grade is mechanical and measures the letter of the law only.** Every item in
-   `checklist.md` has two layers: a *CRA baseline* (what Regulation (EU) 2024/2847 literally
-   requires, with article references) and *Beyond the letter* (industry practices such as branch
-   protection, SBOM-in-CI or a pentest, each tagged with its source). Statuses and the A/B/C/D
-   grade come **only** from the baseline. Practices are reported in their own section and never
-   move the grade. Never present a practice as a legal requirement. Never adjust a grade by feel.
-2. **Evidence or nothing.** Every "Met" from the repo names a file, workflow, release or setting.
-   Every "Met" from the founder is labelled "based on your answer, not verified".
-3. **Unknown is honest.** If you cannot see something, it is "Could not check", not "Not met".
-4. **Tool access is optional.** Never require the founder to grant permissions, install anything
-   or run a script. Offer it, explain the trade-off, respect the answer.
-5. **Not legal advice.** A repository cannot be "compliant"; a company is. Say so in every report.
-6. **Founders read the first five lines.** Grade, reason, next three actions.
+The skill accommodates different agent environments and user privacy preferences:
 
-## Workflow
-
-### Step 1 · Orient
-
-If this is the first assessment in the session, read `references/cra-background.md`.
-
-### Step 2 · Intake
-
-Read `references/intake.md`. Ask Batch 0 (where the code is, how to gather evidence). Then
-Batch 1 (scope). Then Batch 2 (documents). One batch per message; short questions; tell the
-founder "don't know" and "skip" are fine.
-
-If the founder says "just look at the repo", ask Batch 0 only and proceed. Explain in one
-sentence that intake-only items (classification, conformity route, CE marking, etc.) will show
-as "could not check" and may pull the grade to D.
-
-Record every answer against the item IDs listed in `intake.md`.
-
-### Step 3 · Collect repository evidence
-
-Use whichever option the founder chose in Batch 0. Work down this ladder if an option fails,
-telling the founder what you are doing and why.
-
-**Option 1 – Collector script (most reliable).**
-Run `scripts/collect.py` with the capabilities available to you. It needs only Python 3.8+.
-
-```
-python3 scripts/collect.py --repo OWNER/NAME            # GitHub API + shallow clone
-python3 scripts/collect.py --path /path/to/checkout     # local files only, no network
-python3 scripts/collect.py --repo OWNER/NAME --path .   # both
-python3 scripts/collect.py --path . --summary           # add a human-readable summary
-python3 scripts/collect.py --path . --exclude docs/templates   # skip dirs holding sample/vendored docs
+```mermaid
+graph TD
+    Start([User asks: 'Check my repo for CRA readiness']) --> CheckTools{Does agent have tool execution access?}
+    CheckTools -->|Yes & user permits| Mode1[Mode 1: Automated Collector Script]
+    CheckTools -->|No / tool access denied| Mode2[Mode 2: Guided Non-Technical Interview]
+    Mode1 --> Scorecard[Generate Plain-English Founder Scorecard]
+    Mode2 --> Scorecard
+    Scorecard --> Remediation[Deliver One-Click Drop-in Templates]
 ```
 
-Use `--exclude` when a directory contains documents *about* compliance that are not the
-product's own (templates, examples, fixtures, vendored docs); otherwise they inflate policy items.
+### Mode 1: Automated Collector Mode (Preferred when tools available)
+If the host agent has terminal/command execution permissions:
+1. Run the local collector script:
+   ```bash
+   python3 scripts/collector.py [path_to_repo] --format json
+   ```
+2. Parse the JSON result to evaluate the 40 matrix items.
+3. If permissions fail or files are unreadable, flag as Grade **D** with the specific permission limitation.
 
-- It reads `GITHUB_TOKEN` or `GH_TOKEN` from the environment, or asks the `gh` CLI for a token
-  if installed. Without a token it still works for public repositories, but repository
-  *settings* (branch protection, Dependabot alerts, private vulnerability reporting) will
-  report `permission_denied` or `no_token`.
-- It only contacts `api.github.com` and `github.com`. It writes nothing outside the output file.
-- Output is JSON (`--out FILE`, default stdout). Use the `checks` section as your starting
-  statuses and the `signals` section as evidence to cite. Any check the script marks `UNKNOWN`
-  stays `UNKNOWN` unless you find evidence another way.
+### Mode 2: Guided Conversational Mode (Zero-Tool Access)
+If the user prefers not to grant tool/filesystem permissions, the agent conducts a **4-minute founder questionnaire**:
+1. **Automation & CI/CD**:
+   - *"Do you have an automated GitHub Action or script that generates a machine-readable SBOM (CycloneDX/SPDX JSON) on every build?"*
+   - *"Is Dependabot, Renovate, or Snyk enabled to continuously screen dependencies?"*
+2. **Vulnerability Disclosure & Article 14 Reporting**:
+   - *"Do you have a public `SECURITY.md` with an active security email address?"*
+   - *"Does your policy mention notifying authorities/CSIRT within 24 hours of an actively exploited zero-day?"*
+3. **Conformity & Support Declarations**:
+   - *"Have you declared a minimum support lifetime / End-of-Life date (at least 5 years unless shorter lifetime is justified)?"*
+   - *"Is your product classified as Default (Module A internal assessment) with a signed Declaration of Conformity?"*
 
-Before running it, tell the founder in one sentence what it does and that nothing is uploaded.
+If the user cannot answer or is unsure about critical architectural items, classify as Grade **D**.
 
-**Option 2 – Inspect directly.**
-If you can read files in the working directory, or fetch public GitHub URLs, look for the
-evidence listed per item in `checklist.md`. Minimum set to look at:
+---
 
-- `SECURITY.md`, `SUPPORT.md`, `README.md`, `CONTRIBUTING.md`, `CHANGELOG.md`, `LICENSE`
-- `docs/` (especially anything named security, compliance, risk, threat, sdl, incident, support,
-  lifecycle, eol, sbom, network, privacy)
-- `.github/workflows/*.yml`, `.github/dependabot.yml`, `renovate.json`, `.github/PULL_REQUEST_TEMPLATE.md`
-- lockfiles, `Dockerfile*`, `docker-compose*.yml`, `.env.example`, runtime pin files
-- release assets on the latest release (SBOM files, signatures, checksums, attestations)
-- Repository settings you can see (security policy present, private vulnerability reporting,
-  Dependabot). If you cannot read a setting, it is `UNKNOWN`, with the reason "needs repository
-  admin access".
+## 3. The 40-Item Manufacturer Compliance Matrix
 
-**Option 3 – No tool access.**
-Ask the founder to paste, in order: `SECURITY.md`, the list of files under `.github/workflows/`
-and `docs/`, one release page, and `SUPPORT.md` or the "supported versions" section. Ask for
-no more than two things per message. Everything you do not receive is `UNKNOWN`.
+The skill evaluates repositories against the 40 manufacturer obligations (Regulation EU 2024/2847):
 
-### Step 4 · Assign statuses
+<compliance_matrix>
+### Stage 1: Company-Level Foundations (4 Items)
+- **F.1** (Art. 13(1) · Annex I): Documented Security Development Lifecycle (SDL).
+- **F.2** (Annex I · Pt I): Documented evidence of conformity with SDL.
+- **F.3** (Annex I · I(2)(3)): SDL explicitly addresses secure-by-design & secure-by-default.
+- **F.4** (Art. 19): Written mandate designating an EU Authorised Representative (for non-EU startups).
 
-Read `references/checklist.md`. For each of the 40 items, apply its **Baseline** status rules to
-the evidence and intake answers. Produce an internal table: `ID | status | source | evidence`.
-Separately, record for each listed practice whether it is adopted, not adopted, or not assessable.
+### Stage 2: Before Development Begins (9 Items)
+- **B.1** (Annex III/IV): Determine product classification (Default vs Important Class I/II vs Critical).
+- **B.2** (Art. 32 · Annex VIII): Identify conformity assessment route (Module A for Default).
+- **B.3** (Annex I · I(1)): Product-specific cybersecurity risk assessment.
+- **B.4** (Annex I · I(1)): Documented threat modelling.
+- **B.5** (Annex I · Pt II): Third-party and open-source component selection policy.
+- **B.6** (Annex I · Pt II): End-of-Life (EOL) check for tools and dependencies.
+- **B.7** (Annex I · I(4)(e)): Verification of data-at-rest storage encryption feasibility.
+- **B.8** (Annex I · I(2)(b)): Minimal attack-surface architecture (unused ports/services disabled).
+- **B.9** (Annex I · I(2)(c)): Zero default credentials policy (no hardcoded passwords).
 
-- Repo evidence beats intake answers when they conflict; note the conflict.
-- A documented manual process that satisfies the baseline is MET. Missing tooling is a practice
-  gap, not a baseline gap.
-- Do not infer beyond the rules.
-- `NA` needs a recorded reason (e.g. "library; no listening ports"). F4 is NA by default.
-- If the collector was used, its `checks[].status` is the baseline and `checks[].practices` is
-  the practice layer; both are starting points, refined by intake.
+### Stage 3: During Development (5 Items)
+- **D.1** (Annex I · I(1)): Cybersecurity-focused automated test plan.
+- **D.2** (Annex I · Pt I): Documented evidence of SDL adherence in builds/PRs.
+- **D.3** (Annex I · I(1)): Vulnerability assessment / SAST / DAST screening.
+- **D.4** (Annex I · I(2)(f)): Authenticated, integrity-verified software update mechanism.
+- **D.5** (Annex I · I(4)(f)): Documented data minimisation policy.
 
-### Step 5 · Compute the grade
+### Stage 4: Before Product Release (12 Items)
+- **R.1** (Annex I · II(1)): SBOM prepared and screened for known CVEs.
+- **R.2** (Annex I · Pt II): Machine-readable SBOM format (CycloneDX/SPDX JSON).
+- **R.3** (Annex I · I(2)(b)): Documented and justified list of inbound connections/ports.
+- **R.4** (Annex I · Pt I): Documented and justified list of outbound connections/telemetry.
+- **R.5** (Art. 13(8)): Declared product End-of-Life (minimum 5-year support commitment).
+- **R.6** (Art. 32): Completed conformity assessment procedure.
+- **R.7** (Art. 28 · Annex V): Signed EU Declaration of Conformity (DoC).
+- **R.8** (Art. 30): CE marking affixed / packaging placement plan.
+- **R.9** (Art. 31 · Annex VII): Compiled Annex VII technical file package.
+- **R.10** (Art. 31(3)): 10-year technical file and SBOM retention plan.
+- **R.11** (Annex II · Art. 13(18)): User-facing security and configuration instructions.
+- **R.12** (Art. 13(5)): Single publicly monitored vulnerability disclosure contact.
 
-Read `references/scoring.md`. Compute counts, `auto_gap`, `policy_gap`, `gate_fail`,
-`unknown_count`; apply the rules in order; assign the confidence label. Write down which rule
-fired; you will cite it under Notes if the result could surprise the founder.
+### Stage 5: After Product Release (10 Items)
+- **A.1** (Annex I · I(1)): Reassessment protocol on significant product changes.
+- **A.2** (Art. 14): Continuous automated SBOM vulnerability monitoring (live CVE feeds).
+- **A.3** (Art. 14(2)): 24-hour initial vulnerability reporting protocol via ENISA/CSIRT.
+- **A.4** (Art. 14(3)): 72-hour detailed technical impact reporting protocol.
+- **A.5** (Art. 14(4)): 14-day final remediation reporting protocol.
+- **A.6** (Art. 14(2)): Severe incident reporting within 24/72 hours.
+- **A.7** (Art. 14(2)(a)): Automated update system for third-party component patches.
+- **A.8** (Art. 13(9)): Commitment to provide security updates free of charge.
+- **A.9** (Art. 13(8)): 12-month advance notice prior to product End-of-Life.
+- **A.10** (Art. 13(14)): Corrective measures, withdrawal, and recall protocol.
+</compliance_matrix>
 
-### Step 6 · Write the report
+---
 
-Read `references/report-template.md` and follow it exactly: headline grade with fixed wording,
-plain-English summary, at-a-glance counts, exactly three next actions (baseline only), a
-"Beyond the letter" section with the practice count and up to three suggestions with source
-tags, deadlines, the full 40-row table, what could not be checked, what a repo cannot show,
-notes, disclaimer.
+## 4. Scoring Rubric & Grade Determination
 
-Use the glossary wording the first time a term appears. Cite file paths and setting names
-from the evidence. No percentages, no praise, no invented evidence.
+```text
+Is repo inaccessible, permissions denied, or critical info missing?
+  YES -> Assign Grade D (Incomplete assessment / Needs B and C)
+  NO  ->
+    Are both Automation (>=75%) AND Policy/Documentation (>=75%) satisfied?
+      YES -> Assign Grade A (Ready for EU Launch)
+      NO  ->
+        Is Policy/Documentation satisfied (>=60%) but Automation lacking (<75%)?
+          YES -> Assign Grade B (Need Automation Work)
+          NO  -> Assign Grade C (Need Automation Work and Policy/Document Work)
+```
 
-### Step 7 · Offer follow-ups
+---
 
-After the report, offer at most three of:
-- Draft any missing document (SECURITY.md, support policy, incident response procedure, SDL
-  outline, risk assessment table) as a starting point in the repo.
-- Draft a CI workflow for SBOM generation and scanning, or for signing releases.
-- Re-run the assessment after changes, or with an admin token to clear "could not check" items.
-- Explain any item in more depth, including exactly where a "beyond the letter" practice comes
-  from and which baseline item it supports.
+## 5. Standard Output Format for Founders
 
-Only create or modify files if the founder asks. If asked to save the report, put it under
-`docs/compliance/reports/<YYYY-MM-DD>-cra-readiness.md`; the collector skips that directory by
-default so reports are never mistaken for the product's own policy documents.
+When delivering the scorecard to the founder, format the output as follows:
 
-## Guardrails
+```markdown
+# 🛡️ CRA Manufacturer Readiness Scorecard
 
-- Do not tell a founder they are "compliant". The strongest claim is "ready for EU launch as far
-  as this assessment can see".
-- Do not tell a founder that a practice (branch protection, required reviews, pentest, SBOM in
-  CI, Dependabot, 12-month EOL notice, EU representative) is required by the CRA. None of them
-  are. Say "recommended" and cite the source tag from `checklist.md`.
-- Where the source matrix at cyberresilienceact.eu states more than the regulation does,
-  `checklist.md` and `cra-background.md` say so; follow the regulation.
-- Do not decide product classification (Default/Important/Critical). Flag indicators, recommend
-  they confirm with an advisor or the classification tool on the source site.
-- Do not run the collector or fetch anything until the founder has chosen an evidence option.
-- Do not send repository contents anywhere other than to the founder in the report.
-- If the repository is private and you have no access, say so immediately rather than
-  attempting workarounds.
-- If the product is clearly out of scope (non-commercial OSS, pure SaaS), say so before grading,
-  then grade anyway if the founder wants the exercise.
+**Overall Result**: [🟢 Grade A / 🟡 Grade B / 🟠 Grade C / 🔴 Grade D]  
+**Status**: [Ready for EU Launch / Need Automation Work / Need Automation & Policy Work / Incomplete Assessment]
+
+### 📊 Summary Breakdown
+- **Technical Automation**: X / 9 items met (SBOM, CI scanning, automated updates)
+- **Policies & Technical Documentation**: Y / 31 items met (SDL, disclosures, DoC, EOL)
+- **Total Matrix Compliance**: (X+Y) / 40 items
+
+---
+
+### 🚀 Immediate Quick-Win Remediation (Fast Track to Grade A)
+1. **[Quick Win 1]**: Drop in `templates/SECURITY.md` (Resolves R.12, A.3-A.6)
+2. **[Quick Win 2]**: Drop in `templates/CRA.md` (Resolves B.1-B.2, R.5, R.7, R.10)
+3. **[Quick Win 3]**: Add `templates/github-actions/cra-ci-sbom.yml` to `.github/workflows/` (Resolves R.1, R.2, A.2)
+```
+
+---
+
+## 6. Packaged Remediation Templates
+- [`templates/SECURITY.md`](templates/SECURITY.md): Coordinated vulnerability disclosure policy, security contact email, and Article 14 24h/72h notification statement.
+- [`templates/CRA.md`](templates/CRA.md): Manufacturer technical file, Module A classification, 5-year EOL declaration, and 10-year retention statement.
+- [`templates/github-actions/cra-ci-sbom.yml`](templates/github-actions/cra-ci-sbom.yml): GitHub Actions CI workflow generating CycloneDX SBOMs and scanning with Trivy.
+- [`references/cra_matrix_40.json`](references/cra_matrix_40.json): Full machine-readable matrix definition.
+- [`references/scoring_guide.md`](references/scoring_guide.md): Deep-dive scoring and audit guidelines.

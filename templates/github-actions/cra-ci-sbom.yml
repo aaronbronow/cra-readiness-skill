@@ -1,0 +1,46 @@
+name: CRA Cybersecurity & SBOM Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  schedule:
+    # Continuous weekly vulnerability monitoring (CRA Art. 14 / A.2)
+    - cron: '0 4 * * 1'
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  cra-compliance:
+    name: CRA Readiness & SBOM Generation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Generate Machine-Readable SBOM (CycloneDX / Syft)
+        uses: anchore/sbom-action@v0
+        with:
+          format: 'cyclonedx-json'
+          output-file: 'sbom.cyclonedx.json'
+          upload-artifact: true
+          upload-artifact-retention: 90
+
+      - name: Vulnerability Screening (Trivy / Annex I.II.1)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'table'
+          exit-code: '0'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Archive SBOM Compliance Record (CRA Art. 31(3))
+        uses: actions/upload-artifact@v4
+        with:
+          name: cra-sbom-evidence
+          path: sbom.cyclonedx.json
+          retention-days: 90

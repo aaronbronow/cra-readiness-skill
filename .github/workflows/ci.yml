@@ -27,36 +27,40 @@ jobs:
           python-version: ${{ matrix.python }}
 
       - name: Byte-compile the collector
-        run: python -m py_compile scripts/collect.py
+        run: python -m py_compile scripts/collector.py
 
       - name: Collector runs offline against this checkout
         run: |
-          python scripts/collect.py --path . --no-api --out evidence.json
+          python scripts/collector.py . --format json > evidence.json
           python - <<'PY'
           import json
           d = json.load(open("evidence.json"))
-          assert len(d["checks"]) == 40, "expected 40 checklist items"
-          assert d["access"]["local_files"] is True
-          ids = [c["id"] for c in d["checks"]]
-          assert ids[0] == "F1" and ids[-1] == "P10", ids
-          print("collector OK:", d["counts"])
+          assert d["total_items"] == 40, f"expected 40 checklist items, got {d.get('total_items')}"
+          assert d["assessed_items"] == 40
+          assert len(d["item_details"]) == 40
+          print("collector OK:", d["grade"], d["stage_breakdowns"])
           PY
 
-      - name: Reference files are complete
+      - name: Reference files and templates are complete
         run: |
           set -e
-          for f in SKILL.md references/checklist.md references/scoring.md references/intake.md \
-                   references/report-template.md references/glossary.md references/cra-background.md; do
+          for f in SKILL.md references/cra_matrix_40.json references/scoring_guide.md \
+                   templates/CRA.md templates/SECURITY.md templates/github-actions/cra-ci-sbom.yml \
+                   tests/cosign_cra_readiness_report.md; do
             test -s "$f" || { echo "missing $f"; exit 1; }
           done
           # SKILL.md frontmatter must declare a name and description
           head -5 SKILL.md | grep -q '^name: ' && head -5 SKILL.md | grep -q '^description: '
-          # all 40 item IDs must be present in the checklist
-          for id in F1 F2 F3 F4 B1 B2 B3 B4 B5 B6 B7 B8 B9 D1 D2 D3 D4 D5 \
-                    R1 R2 R3 R4 R5 R6 R7 R8 R9 R10 R11 R12 P1 P2 P3 P4 P5 P6 P7 P8 P9 P10; do
-            grep -q "^### $id " references/checklist.md || { echo "checklist missing $id"; exit 1; }
-          done
-          echo "references OK"
+          # verify matrix has 40 items across 5 stages
+          python - <<'PY'
+          import json
+          matrix = json.load(open("references/cra_matrix_40.json"))
+          items = [item["id"] for stage in matrix["stages"] for item in stage["items"]]
+          assert len(items) == 40, f"expected 40 items in matrix, got {len(items)}"
+          assert len(matrix["stages"]) == 5, f"expected 5 stages, got {len(matrix['stages'])}"
+          print("matrix OK: 40 items across", len(matrix["stages"]), "stages")
+          PY
+          echo "references and templates OK"
 
   secrets:
     name: secrets
