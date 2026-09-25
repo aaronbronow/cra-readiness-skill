@@ -29,8 +29,7 @@ jobs:
         run: |
           set -euo pipefail
           pin="$(tr -d '[:space:]' < .python-version)"
-          cycle="${pin%.*}"
-          if [[ "$pin" == "$cycle" ]]; then cycle="$pin"; fi
+          cycle="$(echo "$pin" | cut -d. -f1,2)"
           json="$(curl -fsSL "https://endoflife.date/api/python/${cycle}.json")"
           eol="$(printf '%s' "$json" | python3 -c 'import json,sys; print(json.load(sys.stdin)["eol"])')"
           echo "Python ${cycle}: security support ends ${eol}"
