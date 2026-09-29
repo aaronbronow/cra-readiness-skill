@@ -197,5 +197,22 @@ class TestPerformanceBenchmarks(BaseTestCase):
         self.assertLess(g_res.duration_ms, 500)
 
 
+class TestFixtureGroundTruth(BaseTestCase):
+    def test_fixture_grades(self):
+        fixture_dir = REPO_ROOT / "fixtures"
+        if not (fixture_dir / "repo-grade-a").exists():
+            self.skipTest("Fixtures directory not found")
+
+        grade_a = self.gemini.run(fixture_dir / "repo-grade-a")
+        self.assertEqual(grade_a.grade, "A")
+
+        grade_b = self.gemini.run(fixture_dir / "repo-grade-b")
+        self.assertEqual(grade_b.grade, "B")
+
+        grade_c = self.gemini.run(fixture_dir / "repo-grade-c")
+        self.assertEqual(grade_c.grade, "C")
+
+
 if __name__ == "__main__":
     unittest.main()
+

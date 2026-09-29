@@ -1,0 +1,2 @@
+# Architecture
+Minimal connections.

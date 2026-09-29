@@ -1,0 +1,9 @@
+name: Release SBOM
+on: [push]
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: anchore/sbom-action@v0
+        with:
+          format: cyclonedx-json
