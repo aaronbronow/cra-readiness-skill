@@ -65,12 +65,17 @@ jobs:
             dist/*.tar.gz
             dist/*.spdx.json
 
-      - name: Create GitHub release
+      - name: Create or update GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          gh release create "$TAG" dist/* \
-            --title "$TAG" \
-            --generate-notes \
-            --notes "Assets: skill tarball, SPDX SBOM, SHA256SUMS. Verify provenance with: gh attestation verify <file> --repo ${GITHUB_REPOSITORY}"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists, updating assets..."
+            gh release upload "$TAG" dist/* --clobber
+          else
+            gh release create "$TAG" dist/* \
+              --title "$TAG" \
+              --generate-notes \
+              --notes "Assets: skill tarball, SPDX SBOM, SHA256SUMS. Verify provenance with: gh attestation verify <file> --repo ${GITHUB_REPOSITORY}"
+          fi
