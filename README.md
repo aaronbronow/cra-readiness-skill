@@ -3,6 +3,9 @@
 > **An agent-agnostic AI skill and headless audit engine for startup founders and builders to answer:**  
 > *"Give me a score based on how ready my GitHub repo is to comply with the Cyber Resilience Act."*
 
+> 🔴 **LIVE WORKSHOP SESSION**: [👉 Click here to join the Interactive Claude Session](https://claude.ai) *(Presenter updates this URL on workshop day)*  
+> *(No terminal or local code required. Works on mobile & desktop browser.)*
+
 Evaluates software repositories against the official **40-item CRA Manufacturer Compliance Matrix** (Regulation EU 2024/2847) using a **3-tier scan control architecture**, outputting a plain-English founder letter grade ($A, B, C, D$) with drop-in remediation templates.
 
 ---
@@ -32,6 +35,46 @@ To ensure deterministic reliability in headless CI while providing deep contextu
    - For candidate documents (`SECURITY.md`, `CRA.md`, `docs/`), an AI agent reads the text and checks semantic adherence to statutory CRA requirements (e.g. 24h CSIRT notification, 5-year free updates, Module A self-assessment).
 3. **Tier 3: Guided Founder Questionnaire (`NEEDS_USER_INPUT`)**:
    - For organizational items that cannot be proven by code alone (e.g. EU Authorised Representative, internal SDL conformity), the agent asks a short, targeted plain-English questionnaire.
+
+---
+
+## 🎤 Presentation Quickstart (Workshop Day Checklist)
+
+> **For Workshop Presenters & Hosts**: Follow these 4 steps on the day of the workshop to prepare your room, initialize the live Claude instance, and launch the hands-on session for both mobile attendees and CLI power users.
+
+### Step 1: Pre-Workshop Room & Slides Setup
+- [ ] **Display Pre-Meeting QR Code**: Put a slide on the projector with a QR code pointing directly to this GitHub repository (`https://github.com/aaronbronow/cra-readiness-skill`) so attendees can scan and bookmark it on their phones or laptops as they enter.
+- [ ] **Presenter Reminder Slide**: Ensure your slide deck includes a visual reminder slide: *"SWITCH TO GITHUB REPO"* to transition from the deck into live demo mode.
+
+### Step 2: Initialize the Claude Shared Session (10 mins before start)
+- [ ] Open [Claude Web](https://claude.ai) in your browser.
+- [ ] Start a new chat, copy the full contents of [`templates/workshop-mobile-copilot.md`](templates/workshop-mobile-copilot.md), and send it as the initial message.
+- [ ] Claude will reply with the interactive Virtual Compliance Officer introduction.
+- [ ] Click the **"Share"** button in the top-right corner of the Claude chat window to generate a public shared conversation URL (`https://claude.ai/share/...`).
+
+### Step 3: Publish the Live Link & Push to GitHub (5 mins before start)
+- [ ] Update the **Live Workshop Link** banner at the top of this README with your active URL:
+  ```markdown
+  > 🔴 **LIVE WORKSHOP SESSION**: [👉 Click here to join the Interactive Claude Session](https://claude.ai/share/YOUR_SESSION_ID)
+  ```
+- [ ] Commit and push to main:
+  ```bash
+  git commit -am "docs: update live workshop Claude session URL"
+  git push
+  ```
+
+### Step 4: Kickoff & Participant Onboarding
+- [ ] Switch your presentation screen from your slide deck to this GitHub repository page.
+- [ ] Ask all attendees to **refresh the GitHub repository page** in their mobile or laptop browsers.
+- [ ] Direct attendees to their preferred track:
+  - **📱 Mobile / Browser Track (No terminal, private repos)**: Click the **Live Workshop Session** link above to launch their private 5-minute audit in Claude Web.
+  - **💻 CLI / Local Agent Track**: Attendees with terminal setups or Claude Code can clone the skill directly:
+    ```bash
+    # Global Claude skills directory:
+    git clone https://github.com/aaronbronow/cra-readiness-skill.git ~/.claude/skills/cra-readiness-skill
+    # Or directly inside their project:
+    git clone https://github.com/aaronbronow/cra-readiness-skill.git .skills/cra-readiness-skill
+    ```
 
 ---
 

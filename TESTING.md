@@ -116,8 +116,8 @@ This represents a founder using a restricted chat window or desktop application 
 - Claude Desktop App, ChatGPT, or GitHub Copilot Chat in web mode (no terminal execution allowed).
 
 #### Test Execution:
-1. Copy the content of [`SKILL.md`](SKILL.md) and [`references/interview_guide.md`](references/interview_guide.md) into the prompt context.
-2. Prompt the agent:
+1. For an interactive workshop assessment, use the standalone prompt in [`templates/workshop-mobile-copilot.md`](templates/workshop-mobile-copilot.md).
+2. Alternatively, copy the content of [`SKILL.md`](SKILL.md) and [`references/interview_guide.md`](references/interview_guide.md) into the prompt context and prompt:
    > *"I am a startup founder. Can you evaluate my repository readiness for the EU Cyber Resilience Act? I don't have tool access enabled, so please conduct the conversational assessment."*
 
 #### Expected Agent Behavior:

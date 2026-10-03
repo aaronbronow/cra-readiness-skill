@@ -91,7 +91,7 @@ For any failing items, provide the immediate one-click solution from `templates/
 
 ---
 
-## 4. Zero-Tool Sandbox Mode (Claude Code Desktop / Copilot Chat)
+## 4. Zero-Tool Sandbox Mode (Claude Desktop / Copilot Chat)
 
 If tool execution is disabled or unavailable:
 1. Conduct the **4-minute founder questionnaire** from [`references/interview_guide.md`](references/interview_guide.md).
@@ -100,7 +100,19 @@ If tool execution is disabled or unavailable:
 
 ---
 
-## 5. Headless GitHub Action Mode
+## 5. Interactive Workshop & Mobile Founder Mode (Zero-Install / Private Repos)
+
+For live workshops where attendees use mobile phones or web browsers without terminal tools or local repository checkouts:
+1. Refer to the turnkey prompt in [`templates/workshop-mobile-copilot.md`](templates/workshop-mobile-copilot.md).
+2. The agent adopts the persona of a **Virtual CRA Compliance Officer**:
+   - **Step 1 (Profiling)**: Collects product architecture, incorporation country, and primary tech stack.
+   - **Step 2 (Classification)**: Instantly determines whether the product qualifies for **Module A (Self-Assessment)** vs Important Class I/II.
+   - **Step 3 (Attestation)**: Runs the 4 plain-English compliance questions (EU Rep, SDL practices, 5-year updates, 24h notification).
+   - **Step 4 (Turnkey Artifacts)**: Directly generates custom, copy-paste-ready `CRA.md`, `SECURITY.md`, and `.github/workflows/cra-ci.yml` artifacts tailored to the founder's specific stack.
+
+---
+
+## 6. Headless GitHub Action Mode
 
 Add the audit to your continuous integration pipeline:
 ```yaml
@@ -113,3 +125,4 @@ Add the audit to your continuous integration pipeline:
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 The action will write a full Markdown scorecard directly to `$GITHUB_STEP_SUMMARY` and annotate any missing technical requirements on Pull Requests.
+
