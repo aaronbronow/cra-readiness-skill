@@ -1,5 +1,5 @@
 name: 'EU Cyber Resilience Act (CRA) Readiness Audit'
-description: 'Deterministic, zero-dependency audit evaluating repositories against the 40-item CRA Manufacturer Compliance Matrix (Regulation EU 2024/2847).'
+description: 'Audits repositories against the 40-item EU Cyber Resilience Act (Regulation EU 2024/2847) matrix.'
 author: 'Aaron Bronow'
 branding:
   icon: 'shield'
