@@ -1,12 +1,25 @@
 # EU Cyber Resilience Act (CRA) Readiness Skill
 
+[![GitHub Release](https://img.shields.io/github/v/release/aaronbronow/cra-readiness-skill?color=blue)](https://github.com/aaronbronow/cra-readiness-skill/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Agents](https://img.shields.io/badge/agents-Claude%20%7C%20Gemini%20%7C%20Cursor%20%7C%20Copilot-blueviolet)](https://github.com/aaronbronow/cra-readiness-skill)
+
+Evaluates software repositories against the official **40-item CRA Manufacturer Compliance Matrix** (Regulation EU 2024/2847) using a **3-tier scan control architecture**, outputting a plain-English founder letter grade ($A, B, C, D$) with drop-in remediation templates.
+
 > **An agent-agnostic AI skill and headless audit engine for startup founders and builders to answer:**  
 > *"Give me a score based on how ready my GitHub repo is to comply with the Cyber Resilience Act."*
 
 > 🔴 **LIVE WORKSHOP SESSION**: [👉 Click here to join the Interactive Claude Session](https://claude.ai) *(Presenter updates this URL on workshop day)*  
 > *(No terminal or local code required. Works on mobile & desktop browser.)*
 
-Evaluates software repositories against the official **40-item CRA Manufacturer Compliance Matrix** (Regulation EU 2024/2847) using a **3-tier scan control architecture**, outputting a plain-English founder letter grade ($A, B, C, D$) with drop-in remediation templates.
+### How to use in Claude 
+
+Paste this...
+> please use this skill to walk me thru the CRA prompts https://github.com/aaronbronow/cra-readiness-skill
+
+Click allow when Claude asks if it can pull the repo (aaronbronow/cra-readiness-skill)
+
+That's it! Claude will evaluate the skill.md and start the walkthrough.
 
 ---
 
