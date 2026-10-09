@@ -1,6 +1,6 @@
 [project]
 name = "cra-readiness-skill"
-version = "0.1.1"
+version = "0.1.2"
 description = "Agent skill and evidence collector that grade a GitHub repository's readiness for the EU Cyber Resilience Act"
 readme = "README.md"
 license = { file = "LICENSE" }

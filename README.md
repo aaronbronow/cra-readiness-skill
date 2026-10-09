@@ -1,5 +1,9 @@
 # EU Cyber Resilience Act (CRA) Readiness Skill
 
+[![GitHub Release](https://img.shields.io/github/v/release/aaronbronow/cra-readiness-skill?color=blue)](https://github.com/aaronbronow/cra-readiness-skill/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Agents](https://img.shields.io/badge/agents-Claude%20%7C%20Gemini%20%7C%20Cursor%20%7C%20Copilot-blueviolet)](https://github.com/aaronbronow/cra-readiness-skill)
+
 Evaluates software repositories against the official **40-item CRA Manufacturer Compliance Matrix** (Regulation EU 2024/2847) using a **3-tier scan control architecture**, outputting a plain-English founder letter grade ($A, B, C, D$) with drop-in remediation templates.
 
 > **An agent-agnostic AI skill and headless audit engine for startup founders and builders to answer:**  
