@@ -36,7 +36,16 @@ jobs:
           rm -rf "dist/${name}"
           ls -la dist
 
-      - name: Generate SBOM (SPDX JSON)
+      - name: Generate CycloneDX SBOM (Syft)
+        uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
+        with:
+          path: .
+          format: cyclonedx-json
+          output-file: dist/cra-readiness-skill-${{ github.ref_name }}.cyclonedx.json
+          upload-artifact: false
+          upload-release-assets: false
+
+      - name: Generate SPDX SBOM (Syft)
         uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
         with:
           path: .
@@ -45,25 +54,25 @@ jobs:
           upload-artifact: false
           upload-release-assets: false
 
-      - name: Scan SBOM for known vulnerabilities (gate)
+      - name: Scan Vulnerability Thresholds (Grype --fail-on critical release gate)
         id: scan
         uses: anchore/scan-action@27805bf3b4e84b4a5c980df22ed233c00390a439 # v7.0.0
         with:
-          sbom: dist/cra-readiness-skill-${{ github.ref_name }}.spdx.json
+          sbom: dist/cra-readiness-skill-${{ github.ref_name }}.cyclonedx.json
           fail-build: true
           severity-cutoff: medium
           output-format: table
 
       - name: Checksums
         working-directory: dist
-        run: sha256sum *.tar.gz *.spdx.json > SHA256SUMS.txt && cat SHA256SUMS.txt
+        run: sha256sum *.tar.gz *.json > SHA256SUMS.txt && cat SHA256SUMS.txt
 
       - name: Attest build provenance (Sigstore)
         uses: actions/attest-build-provenance@v4
         with:
           subject-path: |
             dist/*.tar.gz
-            dist/*.spdx.json
+            dist/*.json
 
       - name: Create or update GitHub release
         env:
@@ -77,5 +86,5 @@ jobs:
             gh release create "$TAG" dist/* \
               --title "$TAG" \
               --generate-notes \
-              --notes "Assets: skill tarball, SPDX SBOM, SHA256SUMS. Verify provenance with: gh attestation verify <file> --repo ${GITHUB_REPOSITORY}"
+              --notes "Assets: skill tarball, CycloneDX & SPDX SBOMs, SHA256SUMS. Verify provenance with: gh attestation verify <file> --repo ${GITHUB_REPOSITORY}"
           fi
