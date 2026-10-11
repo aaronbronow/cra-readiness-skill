@@ -182,10 +182,12 @@ def inspect_repository(
             if tier == "deterministic":
                 if item_id in ("R.1", "R.2"):  # SBOM generation and machine-readable format
                     sbom_files = list(repo_path.glob("*sbom*")) + list(repo_path.glob("*cyclonedx*")) + list(repo_path.glob("*spdx*"))
-                    if any(f.is_file() for f in sbom_files):
+                    if (repo_path / "packablock.yaml").exists():
+                        status, matched_signal = "PASS", "Packablock supply-chain ledger (packablock.yaml)"
+                    elif any(f.is_file() for f in sbom_files):
                         status, matched_signal = "PASS", "SBOM file in repository"
-                    elif "sbom" in wf_texts or "cyclonedx" in wf_texts or "syft" in wf_texts or "spdx" in wf_texts:
-                        status, matched_signal = "PASS", "CI workflow generates/attests SBOM"
+                    elif "sbom" in wf_texts or "cyclonedx" in wf_texts or "syft" in wf_texts or "spdx" in wf_texts or "pkablk" in wf_texts or "packablock" in wf_texts:
+                        status, matched_signal = "PASS", "CI workflow generates/attests SBOM or Packablock ledger"
                     else:
                         status = "FAIL"
 

@@ -54,6 +54,16 @@ jobs:
           upload-artifact: false
           upload-release-assets: false
 
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Append to Packablock Supply Chain Ledger (Local)
+        run: |
+          bunx github:Packablock/packablock-client append packablock.yaml -l uv.lock
+          bunx github:Packablock/packablock-client check packablock.yaml
+          cp packablock.yaml dist/
+
       - name: Scan Vulnerability Thresholds (Grype --fail-on critical release gate)
         id: scan
         uses: anchore/scan-action@27805bf3b4e84b4a5c980df22ed233c00390a439 # v7.0.0
@@ -65,7 +75,7 @@ jobs:
 
       - name: Checksums
         working-directory: dist
-        run: sha256sum *.tar.gz *.json > SHA256SUMS.txt && cat SHA256SUMS.txt
+        run: sha256sum *.tar.gz *.json *.yaml > SHA256SUMS.txt && cat SHA256SUMS.txt
 
       - name: Attest build provenance (Sigstore)
         uses: actions/attest-build-provenance@v4
@@ -73,6 +83,7 @@ jobs:
           subject-path: |
             dist/*.tar.gz
             dist/*.json
+            dist/*.yaml
 
       - name: Create or update GitHub release
         env:
@@ -86,5 +97,5 @@ jobs:
             gh release create "$TAG" dist/* \
               --title "$TAG" \
               --generate-notes \
-              --notes "Assets: skill tarball, CycloneDX & SPDX SBOMs, SHA256SUMS. Verify provenance with: gh attestation verify <file> --repo ${GITHUB_REPOSITORY}"
+              --notes "Assets: skill tarball, CycloneDX & SPDX SBOMs, Packablock supply-chain ledger (packablock.yaml), SHA256SUMS. Verify provenance with: gh attestation verify <file> --repo ${GITHUB_REPOSITORY}"
           fi

@@ -1,0 +1,12 @@
+lockfiles:
+  uv.lock:
+    packages: []
+---
+$yaml-chain-meta:
+  version: 1.0.0
+  block_index: 0
+  timestamp: 2026-10-11T23:45:40.983Z
+  hashing_strategy: raw
+  data_hash: 6d9c02c059f0ceb9f4fa9c2cb2fa9980c63654eac4608d581824cc0097041cd9
+  prev_meta_hash: "0000000000000000000000000000000000000000000000000000000000000000"
+  meta_hash: 0f9963162f312b7d82eba9a1360791afa910e0828c6469e58f950ffb83286ad2
