@@ -59,6 +59,13 @@ jobs:
           head -5 SKILL.md | grep -q '^name: ' && head -5 SKILL.md | grep -q '^description: '
           echo "references and templates OK"
 
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Verify Packablock supply-chain ledger integrity
+        run: bunx github:Packablock/packablock-client check packablock.yaml
+
   secrets:
     name: secrets
     runs-on: ubuntu-24.04
