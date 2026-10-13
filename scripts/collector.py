@@ -203,7 +203,10 @@ def inspect_repository(
                     if dockerfile.exists():
                         d_txt = dockerfile.read_text(encoding="utf-8", errors="ignore").lower()
                         if "user " in d_txt and not "user root" in d_txt:
-                            status, matched_signal = "PASS", "Dockerfile with unprivileged USER"
+                            if "chainguard" in d_txt or "wolfi" in d_txt:
+                                status, matched_signal = "PASS", "Dockerfile with unprivileged USER (Chainguard/Wolfi hardened base)"
+                            else:
+                                status, matched_signal = "PASS", "Dockerfile with unprivileged USER"
                         else:
                             status, matched_signal = "PASS", "Dockerfile container specification"
                     elif (repo_path / "docker-compose.yml").exists():

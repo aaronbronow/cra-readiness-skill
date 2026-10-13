@@ -52,7 +52,7 @@ jobs:
           set -e
           for f in SKILL.md action.yml TESTING.md references/cra_matrix_40.json references/interview_guide.md \
                    templates/CRA.md templates/SECURITY.md templates/github-actions/cra-ci-sbom.yml \
-                   templates/github-actions/cra-audit.yml; do
+                   templates/github-actions/cra-audit.yml templates/github-actions/cra-chainguard-pipeline.yml; do
             test -s "$f" || { echo "missing $f"; exit 1; }
           done
           # SKILL.md frontmatter must declare a name and description
