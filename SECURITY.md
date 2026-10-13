@@ -15,11 +15,12 @@ report and will credit you in the advisory unless you prefer otherwise.
 
 ## Scope
 
-- `scripts/collect.py` (the only executable code in this repository)
+- `scripts/collector.py` (deterministic 3-tier CRA readiness evaluation engine)
+- `scripts/collect.py` (legacy matrix collector)
+- `action.yml` (GitHub composite action)
 - The GitHub Actions workflows under `.github/workflows/`
 
-The markdown files (`SKILL.md`, `references/`) are instructions for an AI agent. Reports about
-incorrect CRA guidance are welcome as ordinary issues, not as security reports.
+The markdown files (`SKILL.md`, `references/`, `templates/`) are instructions and drop-in templates for an AI agent. Reports about incorrect CRA guidance are welcome as ordinary issues, not as security reports.
 
 ## Supported versions
 
@@ -30,8 +31,25 @@ incorrect CRA guidance are welcome as ordinary issues, not as security reports.
 Security updates are free of charge for the full support period. End of support will be
 announced in this file and in the release notes at least 12 months in advance.
 
-## How fixes are delivered
+## Build Process & How Fixes Are Delivered
 
-Fixes ship as a new tagged release. Each release includes a SPDX SBOM, SHA256 checksums and a
-Sigstore build-provenance attestation; see "Verifying a release" in `README.md`. Published
-advisories appear at https://github.com/aaronbronow/cra-readiness-skill/security/advisories.
+Fixes ship as a new tagged release through an automated, hermetic build pipeline:
+
+1. **Hardened Minimal Execution (CRA Annex I.1)**:
+   - Automated testing and scanner execution align with zero-CVE, hardened container baselines (Chainguard / Wolfi).
+2. **Dual Machine-Readable SBOMs (CRA Annex I.2.1 / R.1, R.2)**:
+   - Every release generates both CycloneDX JSON and SPDX JSON SBOMs via Syft (`dist/*.cyclonedx.json` and `dist/*.spdx.json`).
+3. **Vulnerability Screening Gates (CRA Annex I.2.2 / R.1)**:
+   - Automated Grype vulnerability screening against current feeds fails builds on unmitigated medium/high CVEs.
+   - Continuous scheduled OSV-Scanner checks against lockfiles (`uv.lock`).
+4. **Cryptographic Supply-Chain Ledger (Packablock)**:
+   - Every release updates and cryptographically verifies the immutable supply-chain ledger (`packablock.yaml`), recording dependency lockfile snapshots.
+5. **Signed Build Provenance & Checksums (CRA Annex I.2.1 / D.4)**:
+   - Sigstore keyless build-provenance attestations are generated via GitHub Artifact Attestations (`actions/attest-build-provenance`) for all release tarballs, SBOMs, and ledger assets.
+   - Releases include SHA256 checksum manifests (`SHA256SUMS.txt`).
+   - Verify any release asset with:
+     ```bash
+     gh attestation verify <asset-file> --repo aaronbronow/cra-readiness-skill
+     ```
+
+Published advisories appear at https://github.com/aaronbronow/cra-readiness-skill/security/advisories.

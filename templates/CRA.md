@@ -17,9 +17,9 @@
 ## 2. Security Development Lifecycle (SDL) & Secure-by-Default (F.1-F.3, B.8, B.9)
 - **SDL Policy**: All development follows secure coding practices:
   - Branch protection requiring code review before merge.
-  - Automated dependency vulnerability screening in CI (`.github/workflows/cra-ci.yml`).
+  - Automated dependency vulnerability screening in CI (`.github/workflows/cra-ci.yml` or `cra-chainguard.yml`).
   - Strict default credential policy: No default passwords or hardcoded API keys; user-configured secrets required on startup.
-  - Minimal attack surface: Unused ports, development debug routes, and excessive services disabled in production builds.
+  - Minimal attack surface (Annex I.1 / B.8): Unused ports, development debug routes, and excessive services disabled in production builds. Production container base images leverage hardened, zero-CVE distributions (e.g., Chainguard / Wolfi) executing under unprivileged non-root users (UID 65532).
 
 ---
 
@@ -32,7 +32,8 @@
 ---
 
 ## 4. Software Bill of Materials (SBOM) & Dependencies (B.5, R.1, R.2, A.2)
-- **Machine-Readable Format**: CycloneDX / SPDX JSON generated automatically on release.
+- **Machine-Readable Format**: CycloneDX / SPDX JSON generated automatically on release via Syft.
+- **Supply-Chain Verification**: Provenance is verified via cryptographic attestations (Sigstore / Packablock ledger).
 - **Dependency Policy**: Direct and transitive dependencies are scanned continuously for known CVEs. No software is deployed with unmitigated high/critical CVEs.
 
 ---

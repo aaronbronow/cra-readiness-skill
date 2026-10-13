@@ -67,3 +67,4 @@ If the founder answers **"No"** or **"Unsure"** to any questions in Modules 1–
   - [`templates/CRA.md`](../templates/CRA.md) for Module A, EOL, and retention declarations.
   - [`templates/SECURITY.md`](../templates/SECURITY.md) for CVD contact and 24h notification protocols.
   - [`templates/github-actions/cra-ci-sbom.yml`](../templates/github-actions/cra-ci-sbom.yml) for automated SBOM and CI security checks.
+  - [`templates/github-actions/cra-chainguard-pipeline.yml`](../templates/github-actions/cra-chainguard-pipeline.yml) for zero-CVE Chainguard cleanroom testing and Syft/Grype scanning.
