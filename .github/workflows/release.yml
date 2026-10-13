@@ -59,9 +59,11 @@ jobs:
           bun-version: latest
 
       - name: Append to Packablock Supply Chain Ledger (Local)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          bunx github:Packablock/packablock-client append packablock.yaml -l uv.lock
-          bunx github:Packablock/packablock-client check packablock.yaml
+          bunx --bun github:Packablock/packablock-client append packablock.yaml -l uv.lock
+          bunx --bun github:Packablock/packablock-client check packablock.yaml
           cp packablock.yaml dist/
 
       - name: Scan Vulnerability Thresholds (Grype --fail-on critical release gate)
