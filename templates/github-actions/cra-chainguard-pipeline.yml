@@ -1,0 +1,59 @@
+name: CRA Chainguard Hardened Pipeline
+
+# EU Cyber Resilience Act (Regulation EU 2024/2847):
+# - Annex I.1 / Art. 10: Minimal attack surface & zero-CVE base container
+# - Annex I.2.1: Machine-readable CycloneDX SBOM via Syft
+# - Annex I.2.2: Scheduled & PR vulnerability scanning via Grype
+# - Art. 31(3): Retain compliance and supply-chain evidence
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  schedule:
+    - cron: '0 4 * * 1' # Weekly continuous monitoring
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  # 1. Cleanroom build/test inside zero-CVE Chainguard container
+  test:
+    name: Hardened Test Environment (Chainguard)
+    runs-on: ubuntu-latest
+    container:
+      image: cgr.dev/chainguard/python:latest-dev
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7
+
+      - name: Run Test Suite in Cleanroom
+        run: |
+          python -m unittest discover tests
+
+  # 2. Supply chain & vulnerability gate with Chainguard scanners
+  supply-chain:
+    name: SBOM & Vulnerability Gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7
+
+      - name: Generate CycloneDX SBOM (Chainguard Syft)
+        run: |
+          docker run --rm -v "${{ github.workspace }}:/work" -w /work \
+            cgr.dev/chainguard/syft:latest dir:. -o cyclonedx-json > sbom.cyclonedx.json
+
+      - name: Scan Vulnerabilities (Chainguard Grype - Medium/High Gate)
+        run: |
+          docker run --rm -v "${{ github.workspace }}:/work" -w /work \
+            cgr.dev/chainguard/grype:latest sbom:sbom.cyclonedx.json --fail-on medium
+
+      - name: Archive SBOM Compliance Record (CRA Art. 31(3))
+        uses: actions/upload-artifact@v4
+        with:
+          name: cra-chainguard-evidence
+          path: sbom.cyclonedx.json
+          retention-days: 90

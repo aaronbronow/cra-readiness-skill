@@ -87,7 +87,7 @@ For any failing items, provide the immediate one-click solution from `templates/
   - Copy [`templates/CRA.md`](templates/CRA.md) to repository root (Annex VII technical file & Module A DoC).
   - Copy [`templates/SECURITY.md`](templates/SECURITY.md) to repository root (CVD contact & Art. 14 24h notification).
 - **For Missing CI Automation (B $\rightarrow$ A)**:
-  - Copy [`templates/github-actions/cra-ci-sbom.yml`](templates/github-actions/cra-ci-sbom.yml) to `.github/workflows/cra-ci.yml`.
+  - Copy [`templates/github-actions/cra-ci-sbom.yml`](templates/github-actions/cra-ci-sbom.yml) (or the zero-CVE hardened [`templates/github-actions/cra-chainguard-pipeline.yml`](templates/github-actions/cra-chainguard-pipeline.yml)) to `.github/workflows/cra-ci.yml`.
 
 ---
 

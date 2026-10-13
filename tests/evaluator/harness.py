@@ -431,7 +431,7 @@ class SyntheticRepoFactory:
             encoding="utf-8",
         )
         (target_dir / "Dockerfile").write_text(
-            "FROM alpine:3.20\nUSER 10001\nENTRYPOINT ['/app']\n",
+            "FROM cgr.dev/chainguard/wolfi-base:latest\nUSER 65532\nENTRYPOINT ['/app']\n",
             encoding="utf-8",
         )
         return target_dir

@@ -143,6 +143,7 @@ Move from **Grade C $\rightarrow$ B $\rightarrow$ A** in minutes using the pre-b
 1. **[`templates/CRA.md`](templates/CRA.md)**: Drop into repo root to provide the Annex VII technical file, product classification, 5-year EOL commitment, and Module A Declaration of Conformity.
 2. **[`templates/SECURITY.md`](templates/SECURITY.md)**: Drop into repo root to document your vulnerability disclosure contact and Article 14 24h/72h reporting protocols.
 3. **[`templates/github-actions/cra-ci-sbom.yml`](templates/github-actions/cra-ci-sbom.yml)**: Drop into `.github/workflows/cra-ci.yml` for automated CycloneDX SBOM generation, Trivy CVE screening, and artifact archiving.
+4. **[`templates/github-actions/cra-chainguard-pipeline.yml`](templates/github-actions/cra-chainguard-pipeline.yml)**: Drop into `.github/workflows/cra-chainguard.yml` for a zero-CVE hardened pipeline running tests and Syft/Grype scanners inside Chainguard containers.
 
 ---
 
